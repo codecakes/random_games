@@ -1,42 +1,10 @@
 import unittest
 from random import choice
 """
-I completed this in under 8 hrs.
-
-Game plays out just like Original 2048. Unbelievable.
-
-Results in OwlTests: Score: 70.0/100
-
-Unit Test Failures:
-[-12.0 pts]
-game = TwentyFortyEight(4, 5)
-game.move(UP)
-
-Input board:
-[[8, 16, 8, 16, 8],
- [16, 8, 16, 8, 16],
- [8, 16, 8, 16, 8],
- [16, 8, 16, 8, 16]]
- ==> Game Over! at line 190, in new_tile
-[-10.0 pts]
-game = TwentyFortyEight(1, 1)
-game.new_tile()
- ==> set tile (0, 0) with frequencies {2: 1.0, 4: 0.0} instead of {2: .9, 4: .1}
-[-8.0 pts] 4 style warnings found (maximum allowed: 10 style warnings)
----------------------------------------------------------------------------
-
-For warnings on original code refer here: http://www.codeskulptor.org/#user38_DjCBcO6l1q_0.py
-
-[line 57] More than one statement on a single line
-    function "merge", line 57
-[line 90] Invalid name "up" (should match [a-z_][a-z0-9_]{2,30}$)
-    function "TwentyFortyEight.reset", line 90
-[line 182] More than one statement on a single line
-    function "TwentyFortyEight.new_tile", line 182
-[line 190] More than one statement on a single line
-    function "TwentyFortyEight.new_tile", line 190
-----------------------------------------------------
-PS: While playing, Line 117: IndexError: list index out of range after a long period.
+THIRD UPDATE
+-----------
+Lovely. Shit just works: http://www.codeskulptor.org/#user38_DjCBcO6l1q_6.py
+same score and report as above.
 
 SECOND UPDATE
 ------------
@@ -77,10 +45,45 @@ game.new_tile()
 [line 70] Too many instance attributes (17/15)
     function "TwentyFortyEight", line 70
 
-THIRD UPDATE
------------
-Lovely. Shit just works: http://www.codeskulptor.org/#user38_DjCBcO6l1q_6.py
-same score and report as above.
+===FIRST UPDATE===
+-------------------
+I completed this in under 8 hrs.
+
+Game plays out just like Original 2048. Unbelievable.
+
+Results in OwlTests: Score: 70.0/100
+
+Unit Test Failures:
+[-12.0 pts]
+game = TwentyFortyEight(4, 5)
+game.move(UP)
+
+Input board:
+[[8, 16, 8, 16, 8],
+ [16, 8, 16, 8, 16],
+ [8, 16, 8, 16, 8],
+ [16, 8, 16, 8, 16]]
+ ==> Game Over! at line 190, in new_tile
+[-10.0 pts]
+game = TwentyFortyEight(1, 1)
+game.new_tile()
+ ==> set tile (0, 0) with frequencies {2: 1.0, 4: 0.0} instead of {2: .9, 4: .1}
+[-8.0 pts] 4 style warnings found (maximum allowed: 10 style warnings)
+---------------------------------------------------------------------------
+
+For warnings on original code refer here: http://www.codeskulptor.org/#user38_DjCBcO6l1q_0.py
+
+[line 57] More than one statement on a single line
+    function "merge", line 57
+[line 90] Invalid name "up" (should match [a-z_][a-z0-9_]{2,30}$)
+    function "TwentyFortyEight.reset", line 90
+[line 182] More than one statement on a single line
+    function "TwentyFortyEight.new_tile", line 182
+[line 190] More than one statement on a single line
+    function "TwentyFortyEight.new_tile", line 190
+----------------------------------------------------
+PS: While playing, Line 117: IndexError: list index out of range after a long period.
+
 """
 
 # Directions, DO NOT MODIFY
@@ -229,7 +232,7 @@ class TwentyFortyEight(object):
                 t_list.append(sum_offset)
                 for _ in xrange(self.grid_height - 1):
                     sum_offset = sum_offset[0] + orient[0], sum_offset[1] + orient[1]
-                    t_list.append(sum_offset)
+                    t_list += [sum_offset]
                 self.orientation[direction].append(t_list)
 
         self._update_tiles()
@@ -371,7 +374,7 @@ if __name__ == "__main__":
     game.move(2)  #DOWN
     print game
 
-    #game.move(3)  #LEFT
+    game.move(3)  #LEFT
     #print game
 
     game.move(4)  #RIGHT
@@ -395,8 +398,22 @@ if __name__ == "__main__":
     game.move(2)  #DOWN
     print game
 
-    #game.move(3)  #LEFT
+    game.move(3)  #LEFT
     #print game
 
     game.move(4)  #RIGHT
     print game
+
+    from cProfile import run
+    run("TwentyFortyEight(5, 5)")
+    run("game.move(1)")  #UP
+
+    run ("game.move(2)")  #DOWN
+
+    run ("game.move(3)")  #LEFT
+
+    run ("game.move(4)")  #RIGHT
+
+    #=======#
+
+    run("TwentyFortyEight(4,5)")
