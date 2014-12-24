@@ -19,8 +19,10 @@ def running_time(func, counter, plot_type, *args, **kwargs):
     counter = 0
     #include counter
     output = (func(counter, *args, **kwargs))  #returns [value, counter]
-    if plot_type == "standard".upper():
+    value, counter = output
+    if plot_type.upper() == "STANDARD":
         plots.append(output)
     else:
-        plots.append((log(value), log(counter)))
+        plots.append((log(float(value)), log(float(counter))))
+    #print plots
     return plt.plot(plots)
