@@ -67,11 +67,17 @@ def calc_z(mu, xbar, sd, sample_size):
 
 #confidence interval
 def ci(xbar, sd, sample_size, z_score = None, percentile = None):
+    """
+    xbar: sample mean
+    percentile: in %
+    """
     if percentile:
-        z_score = scipy.stats.norm.ppf(percentile)
+        #half and /100
+        percentile = (100 - percentile)/200.
+        z_score = abs(scipy.stats.norm.ppf(percentile))
     std_error = se(sd, sample_size)
     cz = critical_z(z_score, std_error)
-    return (xbar - critical_z, xbar + critical_z)
+    return (xbar - cz, xbar + cz)
 
 def ci_margin_error(xbar, z_score, sd, sample_size):
     return critical_z(z_score, se)
