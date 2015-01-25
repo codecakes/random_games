@@ -48,3 +48,15 @@ def normal_distro_probability(x, xbar, var):
 def normal_sample_variance(original_var, sample_size):
     """given original variance but not all data points"""
     return original_var/sample_size
+
+#standard error
+se = lambda sd, sample_size: (sd/sqrt(sample_size))
+
+#critical z score range
+critical_z = lambda z_score, se: z_score * se
+
+#confidence interval
+def ci(xbar, z_score, sd, sample_size):
+    std_error = se(sd, sample_size)
+    cz = critical_z(z_score, std_error)
+    return (xbar - critical_z, xbar + critical_z)
