@@ -79,5 +79,12 @@ def ci(xbar, sd, sample_size, z_score = None, percentile = None):
     cz = critical_z(z_score, std_error)
     return (xbar - cz, xbar + cz)
 
-def ci_margin_error(xbar, z_score, sd, sample_size):
+def ci_margin_error(xbar, sd, sample_size, z_score = None, percentile = None):
+    """
+    z score * std_error is the margine of error i C.I. from the sample mean
+    """
+    if percentile:
+        #half and /100
+        percentile = (100 - percentile)/200.
+        z_score = abs(scipy.stats.norm.ppf(percentile))
     return critical_z(z_score, se)
