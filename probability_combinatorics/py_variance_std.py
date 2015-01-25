@@ -50,11 +50,17 @@ def normal_sample_variance(original_var, sample_size):
     """given original variance but not all data points"""
     return original_var/sample_size
 
+
+###############ALL ABOUT CONFIDENCE INTERVAL####################
+
 #standard error
 se = lambda sd, sample_size: (sd/sqrt(sample_size))
 
-#critical z score range
-critical_z = lambda z_score, se: z_score * se
+#half and /100 hence 200
+critical_z = lambda percentile: abs(scipy.stats.norm.ppf((100 - percentile)/200.))
+
+#marginal error given z score range
+marginal_z = lambda z_score, se: z_score * se
 
 def calc_z(mu, xbar, sd, sample_size):
     """
@@ -65,26 +71,24 @@ def calc_z(mu, xbar, sd, sample_size):
     std_error = se(sd, sample_size)
     return float(xbar - mu)/std_error
 
+def calc_probability_sample_mean(mu, xbar, sd, sample_size):
+    return scipy.stats.norm.cdf(calc_z(mu, xbar, sd, sample_size))
+
+def ci_margin_error(sd, sample_size, z_score = None, percentile = None):
+    """
+    z score * std_error is the margine of error i C.I. from the sample mean
+    """
+    if percentile:
+        critical_z_score = critical_z(percentile)
+    std_error = se(sd, sample_size)
+    return marginal_z(critical_z_score, std_error)
+
+
 #confidence interval
 def ci(xbar, sd, sample_size, z_score = None, percentile = None):
     """
     xbar: sample mean
     percentile: in %
     """
-    if percentile:
-        #half and /100
-        percentile = (100 - percentile)/200.
-        z_score = abs(scipy.stats.norm.ppf(percentile))
-    std_error = se(sd, sample_size)
-    cz = critical_z(z_score, std_error)
-    return (xbar - cz, xbar + cz)
-
-def ci_margin_error(xbar, sd, sample_size, z_score = None, percentile = None):
-    """
-    z score * std_error is the margine of error i C.I. from the sample mean
-    """
-    if percentile:
-        #half and /100
-        percentile = (100 - percentile)/200.
-        z_score = abs(scipy.stats.norm.ppf(percentile))
-    return critical_z(z_score, se)
+    margin_error = ci_margin_error(sd, sample_size, z_score = z_score, percentile = percentile)
+    return (xbar - margin_error, xbar + margin_error)
