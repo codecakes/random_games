@@ -11,6 +11,7 @@ is a better Variance estimate than Sample Variance
 """
 
 from math import sqrt, pi, e
+import scipy.stats
 
 def mean_arr(x):
     sumr = 0.
@@ -55,8 +56,22 @@ se = lambda sd, sample_size: (sd/sqrt(sample_size))
 #critical z score range
 critical_z = lambda z_score, se: z_score * se
 
+def calc_z(mu, xbar, sd, sample_size):
+    """
+    Calculate Z score given normal sample distribution mean
+    and population mean, its std dev and the sample size for the
+    sample distribution.
+    """
+    std_error = se(sd, sample_size)
+    return float(xbar - mu)/std_error
+
 #confidence interval
-def ci(xbar, z_score, sd, sample_size):
+def ci(xbar, sd, sample_size, z_score = None, percentile = None):
+    if percentile:
+        z_score = scipy.stats.norm.ppf(percentile)
     std_error = se(sd, sample_size)
     cz = critical_z(z_score, std_error)
     return (xbar - critical_z, xbar + critical_z)
+
+def ci_margin_error(xbar, z_score, sd, sample_size):
+    return critical_z(z_score, se)
