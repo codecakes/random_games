@@ -51,13 +51,15 @@ def normal_sample_variance(original_var, sample_size):
     return original_var/sample_size
 
 
-###############ALL ABOUT CONFIDENCE INTERVAL####################
+############# ALL ABOUT CONFIDENCE INTERVAL & INFERENTIAL STATS ################
 
 #standard error
 se = lambda sd, sample_size: (sd/sqrt(sample_size))
 
-#half and /100 hence 200
-critical_z = lambda percentile: abs(scipy.stats.norm.ppf((100 - percentile)/200.))
+#half if two tailed else not and /100
+def critical_z(percentile, one_tailed):
+    return abs(scipy.stats.norm.ppf((100 - percentile)/100.)) if one_tailed \
+    else abs(scipy.stats.norm.ppf((100 - percentile)/200.))
 
 #marginal error given z score range
 marginal_z = lambda z_score, se: z_score * se
@@ -74,21 +76,31 @@ def calc_z(mu, xbar, sd, sample_size):
 def calc_probability_sample_mean(mu, xbar, sd, sample_size):
     return scipy.stats.norm.cdf(calc_z(mu, xbar, sd, sample_size))
 
-def ci_margin_error(sd, sample_size, z_score = None, percentile = None):
+def ci_margin_error(sd, sample_size, z_score = None, percentile = None, one_tailed = 0):
     """
     z score * std_error is the margine of error i C.I. from the sample mean
     """
     if percentile:
-        critical_z_score = critical_z(percentile)
+        critical_z_score = critical_z(percentile, one_tailed)
     std_error = se(sd, sample_size)
     return marginal_z(critical_z_score, std_error)
 
 
 #confidence interval
-def ci(xbar, sd, sample_size, z_score = None, percentile = None):
+def ci(xbar, sd, sample_size, z_score = None, percentile = None, one_tailed = 0):
     """
     xbar: sample mean
     percentile: in %
     """
-    margin_error = ci_margin_error(sd, sample_size, z_score = z_score, percentile = percentile)
+    margin_error = ci_margin_error(sd, sample_size, z_score = z_score, percentile = percentile, one_tailed=one_tailed)
     return (xbar - margin_error, xbar + margin_error)
+
+#Decision process component
+def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
+    """
+    calculated_z_score_proportion: the z score calculated from mu and xbar in proportion
+    criticalz_percentage_proportion: Given Critical Value proportion for acceptance criteria
+    if calculated_z_score_proportion > criticalz_percentage_proportion
+    then the chance of that happening is p < criticalz_percentage_proportion
+    """
+    return calculated_z_score_proportion > criticalz_percentage_proportion
