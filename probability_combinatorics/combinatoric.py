@@ -35,8 +35,9 @@ def permutation(num, den):
             num -= 1
         return dec1
 
+#more on Binomial P: http://stattrek.com/probability-distributions/binomial.aspx
 def binomial_probability_distro(n, r, p):
-    return float(combination(n, r)) * p**n * (1-p)**(n-r)
+    return float(combination(n, r)) * (p**r) * (1-p)**(n-r)
 
 expected_value = lambda k, n, r, p: k * binomial_probability_distro(n,r,p)
 
