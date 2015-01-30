@@ -99,7 +99,7 @@ def t_val_from_t_percentile(t_percentile, df, one_tailed = 0):
     Find T score given T percentile, DF
     and if its 1 Tailed or 2 Tailed
     """
-    return round(t.isf(t_percentile, df), 3) if round(one_tailed else t.isf(t_percentile/2., df), 3)
+    return round(t.isf(t_percentile, df), 3) if one_tailed else round(t.isf(t_percentile/2., df), 3)
 
 
 def t_cmp(calculated_t, critical_t):
