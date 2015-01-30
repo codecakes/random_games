@@ -57,10 +57,15 @@ def normal_sample_variance(original_var, sample_size):
 #standard error
 se = lambda sd, sample_size: (sd/sqrt(sample_size))
 
+def se_independent_sample(sd1, sd2, n1, n2):
+    return sqrt((sd1**2 + sd2**2)/float(n1)) if n1==n2 else sqrt((sd1**2/float(n1)) + (sd2**2/float(n2)))
+
+df_independent_sample = lambda n1,n2: (n1+n2-2)
+
 #half if two tailed else not and /100
 def critical_z(percentile, one_tailed):
-    return abs(scipy.stats.norm.ppf((100 - percentile)/100.)) if one_tailed \
-    else abs(scipy.stats.norm.ppf((100 - percentile)/200.))
+    return round(abs(scipy.stats.norm.ppf((100 - percentile)/100.)), 3) if one_tailed \
+    else round(abs(scipy.stats.norm.ppf((100 - percentile)/200.)), 3)
 
 #marginal error given z score range
 marginal_z = lambda z_score, se: z_score * se
@@ -75,7 +80,9 @@ def calc_z(mu, xbar, sd, sample_size):
     return float(xbar - mu)/se(sd, sample_size)
 
 
-def calc_t(mu, xbar, sd, sample_size): return calc_z(mu, xbar, sd, sample_size)
+def calc_t(mu, xbar, sd, sample_size): return round(calc_z(mu, xbar, sd, sample_size), 2)
+
+def calc_t_independent_sample(mu, xbar, se): return round(float(xbar-mu)/se, 2)
 
 def t_percentile(t_val, df, one_tailed=0):
     """
@@ -84,7 +91,7 @@ def t_percentile(t_val, df, one_tailed=0):
     return t.sf(t_val, df) if one_tailed else t.sf(t_val, df) * 2
 
 def critical_t(percentile, df, one_tailed):
-    return t.isf((100-percentile)/100., df) if one_tailed else t.isf((100-percentile)/200., df)
+    return round(t.isf((100-percentile)/100., df), 3) if one_tailed else round(t.isf((100-percentile)/200., df), 3)
 
 #same as above, but in proportion
 def t_val_from_t_percentile(t_percentile, df, one_tailed = 0):
@@ -92,7 +99,7 @@ def t_val_from_t_percentile(t_percentile, df, one_tailed = 0):
     Find T score given T percentile, DF
     and if its 1 Tailed or 2 Tailed
     """
-    return t.isf(t_percentile, df) if one_tailed else t.isf(t_percentile/2., df)
+    return round(t.isf(t_percentile, df), 3) if round(one_tailed else t.isf(t_percentile/2., df), 3)
 
 
 def t_cmp(calculated_t, critical_t):
@@ -150,5 +157,6 @@ def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
 
 ### Correlation Measures using T Stats ####
 def t_r_squared(t_score, df):
+    #calculated t score
     t= t_score**2
     return t/float(t+df)
