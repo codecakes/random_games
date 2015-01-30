@@ -1,5 +1,4 @@
 """
-If there is no numpy/scipy lib;
 var = sd^2 = summ(Xi^2 - mu)/N = summ(Xi^2)/N - mu^2
 
 Observation is:
@@ -75,8 +74,6 @@ def calc_z(mu, xbar, sd, sample_size):
     #std_error = se(sd, sample_size)
     return float(xbar - mu)/se(sd, sample_size)
 
-def critical_t(percentile, df, one_tailed):
-    return t.isf((100-percentile)/100., df) if one_tailed else t.isf((100-percentile)/200., df)
 
 def calc_t(mu, xbar, sd, sample_size): return calc_z(mu, xbar, sd, sample_size)
 
@@ -86,6 +83,10 @@ def t_percentile(t_val, df, one_tailed=0):
     """
     return t.sf(t_val, df) if one_tailed else t.sf(t_val, df) * 2
 
+def critical_t(percentile, df, one_tailed):
+    return t.isf((100-percentile)/100., df) if one_tailed else t.isf((100-percentile)/200., df)
+
+#same as above, but in proportion
 def t_val_from_t_percentile(t_percentile, df, one_tailed = 0):
     """
     Find T score given T percentile, DF
@@ -109,7 +110,7 @@ def ci_t_margin_error(sd, sample_size, df, t_score = None, percentile = None, on
     if percentile: critical_t_score = critical_t(percentile, df, one_tailed)
     elif t_score: critical_t_score = t_score
     #std_error = se(sd, sample_size)
-    return marginal_z(ccritical_t_score, se(sd, sample_size))
+    return marginal_z(critical_t_score, se(sd, sample_size))
 
 def ci_t(xbar, sd, sample_size, df, t_score = None, percentile = None, one_tailed = 0):
     margin_error = ci_t_margin_error(sd, sample_size, df, t_score = t_score, percentile = percentile, one_tailed = one_tailed)

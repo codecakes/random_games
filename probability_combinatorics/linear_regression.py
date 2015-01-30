@@ -19,9 +19,17 @@ def trace_line(x_arr, y_arr, x_start = 0):
     y, m, x, c = line_fitting(x_arr, y_arr)
     return [(i, (m*i)+c) for i in [x_start]+list(x_arr)]
 
-def line_error(x_arr, y_arr):
-    y, m, x, c = line_fitting(x_arr, y_arr)
-    return [(yi - ((m*i)+c))**2 for yi,i in izip(y_arr, x_arr)]
+def line_error(**params):
+    """
+    params: x_arr, y_arr, m,c
+    """
+    if 'x_arr' in params and 'y_arr' in params:
+        if ('m' in params and 'c' in params):
+            m,c = params['m'], params['c']
+        else:
+            y, m, x, c = line_fitting(x_arr, y_arr)
+        return [(yi - ((m*xi)+c))**2 for yi,xi in izip(y_arr, x_arr)]
+
 
 def r_squared(x_arr, y_arr):
     """
@@ -35,6 +43,6 @@ def r_squared(x_arr, y_arr):
     y, m, x, c = line_fitting(x_arr, y_arr)
     total_var_y = ([(i-y)**2 for i in y_arr])  #(y-ybar)^2
     #print sum(total_var_y)
-    variation_not_by_line = float(sum(line_error(x_arr, y_arr)))/sum(total_var_y)
+    variation_not_by_line = float(sum(line_error(x_arr=x_arr, y_arr=y_arr, m=m, c=c)))/sum(total_var_y)
     #R sqaured
     return 1 - variation_not_by_line #total variation in x, variation in line
