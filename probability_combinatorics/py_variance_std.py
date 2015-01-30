@@ -145,3 +145,10 @@ def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
     then the chance of that happening is p < criticalz_percentage_proportion
     """
     return abs(calculated_z_score_proportion) > scipy.stats.norm.cdf(scipy.stats.norm.ppf((100-criticalz_percentage_proportion)/100.))
+
+
+
+### Correlation Measures using T Stats ####
+def t_r_squared(t_score, df):
+    t= t_score**2
+    return t/float(t+df)
