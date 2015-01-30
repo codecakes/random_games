@@ -12,6 +12,9 @@ is a better Variance estimate than Sample Variance
 
 from math import sqrt, pi, e
 import scipy.stats
+from scipy.stats import norm, t
+
+def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
 
 def mean_arr(x):
     sumr = 0.
@@ -21,7 +24,6 @@ def mean_arr(x):
         prod_list.append(i*i)
     return sumr/len(x), prod_list
 
-def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
 
 def variance_biased(x):
     """x is a list of numbers"""
@@ -70,20 +72,58 @@ def calc_z(mu, xbar, sd, sample_size):
     and population mean, its std dev and the sample size for the
     sample distribution.
     """
-    std_error = se(sd, sample_size)
-    return float(xbar - mu)/std_error
+    #std_error = se(sd, sample_size)
+    return float(xbar - mu)/se(sd, sample_size)
+
+def critical_t(percentile, df, one_tailed):
+    return t.isf((100-percentile)/100., df) if one_tailed else t.isf((100-percentile)/200., df)
+
+def calc_t(mu, xbar, sd, sample_size): return calc_z(mu, xbar, sd, sample_size)
+
+def t_percentile(t_val, df, one_tailed=0):
+    """
+    Find P-Value Given T score, DF and if its 1 Tailed or 2 Tailed
+    """
+    return t.sf(t_val, df) if one_tailed else t.sf(t_val, df) * 2
+
+def t_val_from_t_percentile(t_percentile, df, one_tailed = 0):
+    """
+    Find T score given T percentile, DF
+    and if its 1 Tailed or 2 Tailed
+    """
+    return t.isf(t_percentile, df) if one_tailed else t.isf(t_percentile/2., df)
+
+
+def t_cmp(calculated_t, critical_t):
+    """
+    Given Critical T Value and T score,
+    Return if its Significant or Not.
+    """
+    return abs(calculated_t) > abs(critical_t)
 
 def calc_probability_sample_mean(mu, xbar, sd, sample_size):
     return scipy.stats.norm.cdf(calc_z(mu, xbar, sd, sample_size))
+
+def ci_t_margin_error(sd, sample_size, df, t_score = None, percentile = None, one_tailed = 0):
+    critical_t_score = 0.
+    if percentile: critical_t_score = critical_t(percentile, df, one_tailed)
+    elif t_score: critical_t_score = t_score
+    #std_error = se(sd, sample_size)
+    return marginal_z(ccritical_t_score, se(sd, sample_size))
+
+def ci_t(xbar, sd, sample_size, df, t_score = None, percentile = None, one_tailed = 0):
+    margin_error = ci_t_margin_error(sd, sample_size, df, t_score = t_score, percentile = percentile, one_tailed = one_tailed)
+    return (xbar - margin_error, xbar + margin_error)
 
 def ci_margin_error(sd, sample_size, z_score = None, percentile = None, one_tailed = 0):
     """
     z score * std_error is the margine of error i C.I. from the sample mean
     """
-    if percentile:
-        critical_z_score = critical_z(percentile, one_tailed)
-    std_error = se(sd, sample_size)
-    return marginal_z(critical_z_score, std_error)
+    critical_z_score = 0.
+    if percentile: critical_z_score = critical_z(percentile, one_tailed)
+    elif z_score: critical_z_score = z_score
+    #std_error = se(sd, sample_size)
+    return marginal_z(critical_z_score, se(sd, sample_size))
 
 
 #confidence interval
@@ -103,4 +143,4 @@ def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
     if calculated_z_score_proportion > criticalz_percentage_proportion
     then the chance of that happening is p < criticalz_percentage_proportion
     """
-    return calculated_z_score_proportion > criticalz_percentage_proportion
+    return abs(calculated_z_score_proportion) > scipy.stats.norm.cdf(scipy.stats.norm.ppf((100-criticalz_percentage_proportion)/100.))
