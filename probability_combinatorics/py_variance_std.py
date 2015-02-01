@@ -10,6 +10,7 @@ is a better Variance estimate than Sample Variance
 """
 
 from math import sqrt, pi, e
+from numpy import var
 import scipy.stats
 from scipy.stats import norm, t
 
@@ -64,6 +65,8 @@ def se_independent_sample(sd1, sd2, n1, n2):
     """
     return sqrt((sd1**2 + sd2**2)/float(n1)) if n1==n2 else sqrt((sd1**2/float(n1)) + (sd2**2/float(n2)))
 
+pooled_variance = lambda x,y,n1,n2: ((var(x)*n1) + (var(y)*n2))/float(n1+n2-2)
+
 def se_pooled_t(x, y):
     """
     Useful when calculating T stats reports
@@ -73,7 +76,7 @@ def se_pooled_t(x, y):
     """
     n1,n2 = len(x), len(y)
     #sd^2 = \summ(x-xbar)^2 + \summ(y-ybar)^2/df1+df2
-    pooled_var = ((var(x)*n1) + (var(y)*n2))/float(n1+n2-2)
+    pooled_var = pooled_variance(x,y,n1,n2)
     return round(sqrt(pooled_var * (1./n1 + 1./n2)), 2)
 
 
@@ -126,6 +129,32 @@ def t_cmp(calculated_t, critical_t):
     """
     return abs(calculated_t) > abs(critical_t)
 
+
+### Correlation Measures using T Stats ####
+def t_r_squared(t_score, df):
+    #calculated t score
+    """
+    R square generally tells us how much of the difference between 2 means
+    in a particular hypothetisis is due to the given statistical factors
+    OR R squared Error;
+    Higher the Value better the Model of Assumption.
+    Lower the value implies we are missing out on some stat factors and that
+    its a weak hypothesis.
+    """
+    t= t_score**2
+    return t/float(t+df)
+
+
+def t_significant(x, y, percentile, one_sided):
+    df = df_independent_sample(len(x), len(y))
+    t_critical = critical_t(percentile, df, one_sided)
+    xbar= mean(x)
+    ybar = mean(y)
+    std_dev = se_pooled_t(x, y)
+    t_score = calc_t_independent_sample(ybar, xbar, std_dev)
+    return t_score, t_cmp(t_score, t_critical)
+
+
 def calc_probability_sample_mean(mu, xbar, sd, sample_size):
     return scipy.stats.norm.cdf(calc_z(mu, xbar, sd, sample_size))
 
@@ -137,6 +166,8 @@ def ci_t_margin_error(sd, sample_size, df, t_score = None, percentile = None, on
         critical_t_score = t_score  #this is the Critical T value!
     #std_error = se(sd, sample_size)
     return marginal_z(critical_t_score, se(sd, sample_size))
+
+
 
 def ci_t(xbar, sd, sample_size, df, t_score = None, percentile = None, one_tailed = 0):
     margin_error = ci_t_margin_error(sd, sample_size, df, t_score = t_score, percentile = percentile, one_tailed = one_tailed)
@@ -174,19 +205,3 @@ def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
     then the chance of that happening is p < criticalz_percentage_proportion
     """
     return abs(calculated_z_score_proportion) > scipy.stats.norm.cdf(scipy.stats.norm.ppf((100-criticalz_percentage_proportion)/100.))
-
-
-
-### Correlation Measures using T Stats ####
-def t_r_squared(t_score, df):
-    #calculated t score
-    """
-    R square generally tells us how much of the difference between 2 means
-    in a particular hypothetisis is due to the given statistical factors
-    OR R squared Error;
-    Higher the Value better the Model of Assumption.
-    Lower the value implies we are missing out on some stat factors and that
-    its a weak hypothesis.
-    """
-    t= t_score**2
-    return t/float(t+df)
