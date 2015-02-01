@@ -58,7 +58,24 @@ def normal_sample_variance(original_var, sample_size):
 se = lambda sd, sample_size: (sd/sqrt(sample_size))
 
 def se_independent_sample(sd1, sd2, n1, n2):
+    """
+    Useful for finding out
+    CI and comparing Z stats Given a population metric
+    """
     return sqrt((sd1**2 + sd2**2)/float(n1)) if n1==n2 else sqrt((sd1**2/float(n1)) + (sd2**2/float(n2)))
+
+def se_pooled_t(x, y):
+    """
+    Useful when calculating T stats reports
+    since sample metrics are given.
+    x, y: arrays
+    n1, n2: sizes of x, y respectively.
+    """
+    n1,n2 = len(x), len(y)
+    #sd^2 = \summ(x-xbar)^2 + \summ(y-ybar)^2/df1+df2
+    pooled_var = ((var(x)*n1) + (var(y)*n2))/float(n1+n2-2)
+    return round(sqrt(pooled_var * (1./n1 + 1./n2)), 2)
+
 
 df_independent_sample = lambda n1,n2: (n1+n2-2)
 
@@ -114,8 +131,10 @@ def calc_probability_sample_mean(mu, xbar, sd, sample_size):
 
 def ci_t_margin_error(sd, sample_size, df, t_score = None, percentile = None, one_tailed = 0):
     critical_t_score = 0.
-    if percentile: critical_t_score = critical_t(percentile, df, one_tailed)
-    elif t_score: critical_t_score = t_score
+    if percentile:
+        critical_t_score = critical_t(percentile, df, one_tailed)
+    elif t_score:
+        critical_t_score = t_score  #this is the Critical T value!
     #std_error = se(sd, sample_size)
     return marginal_z(critical_t_score, se(sd, sample_size))
 
@@ -143,6 +162,9 @@ def ci(xbar, sd, sample_size, z_score = None, percentile = None, one_tailed = 0)
     margin_error = ci_margin_error(sd, sample_size, z_score = z_score, percentile = percentile, one_tailed=one_tailed)
     return (xbar - margin_error, xbar + margin_error)
 
+def ci_generic(xbar, margin_error):
+    return (xbar-margin_error, xbar+margin_error)
+
 #Decision process component
 def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
     """
@@ -158,5 +180,13 @@ def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
 ### Correlation Measures using T Stats ####
 def t_r_squared(t_score, df):
     #calculated t score
+    """
+    R square generally tells us how much of the difference between 2 means
+    in a particular hypothetisis is due to the given statistical factors
+    OR R squared Error;
+    Higher the Value better the Model of Assumption.
+    Lower the value implies we are missing out on some stat factors and that
+    its a weak hypothesis.
+    """
     t= t_score**2
     return t/float(t+df)
