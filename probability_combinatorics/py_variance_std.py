@@ -10,9 +10,12 @@ is a better Variance estimate than Sample Variance
 """
 
 from math import sqrt, pi, e
+from itertools import izip, imap
 from numpy import var
 import scipy.stats
-from scipy.stats import norm, t
+
+#zscore, t score, f score
+from scipy.stats import norm, t, f
 
 def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
 
@@ -82,10 +85,6 @@ def se_pooled_t(x, y):
 
 df_independent_sample = lambda n1,n2: (n1+n2-2)
 
-#half if two tailed else not and /100
-def critical_z(percentile, one_tailed):
-    return round(abs(scipy.stats.norm.ppf((100 - percentile)/100.)), 3) if one_tailed \
-    else round(abs(scipy.stats.norm.ppf((100 - percentile)/200.)), 3)
 
 #marginal error given z score range
 marginal_z = lambda z_score, se: z_score * se
@@ -99,6 +98,15 @@ def calc_z(mu, xbar, sd, sample_size):
     #std_error = se(sd, sample_size)
     return float(xbar - mu)/se(sd, sample_size)
 
+#half if two tailed else not and /100
+def critical_z(percentile, one_tailed):
+    #calculate critical z from critical percentage
+    return round(abs(scipy.stats.norm.ppf((100 - percentile)/100.)), 3) if one_tailed \
+    else round(abs(scipy.stats.norm.ppf((100 - percentile)/200.)), 3)
+
+def calc_probability_sample_mean(mu, xbar, sd, sample_size):
+    #calculate percentage from z score
+    return scipy.stats.norm.cdf(calc_z(mu, xbar, sd, sample_size))
 
 def calc_t(mu, xbar, sd, sample_size): return round(calc_z(mu, xbar, sd, sample_size), 2)
 
@@ -146,6 +154,10 @@ def t_r_squared(t_score, df):
 
 
 def t_significant(x, y, percentile, one_sided):
+    """
+    by calculating from independent sampling from a bunch of samples
+    when population params are not given
+    """
     df = df_independent_sample(len(x), len(y))
     t_critical = critical_t(percentile, df, one_sided)
     xbar= mean(x)
@@ -155,8 +167,6 @@ def t_significant(x, y, percentile, one_sided):
     return t_score, t_cmp(t_score, t_critical)
 
 
-def calc_probability_sample_mean(mu, xbar, sd, sample_size):
-    return scipy.stats.norm.cdf(calc_z(mu, xbar, sd, sample_size))
 
 def ci_t_margin_error(sd, sample_size, df, t_score = None, percentile = None, one_tailed = 0):
     critical_t_score = 0.
@@ -205,3 +215,32 @@ def z_cmp(calculated_z_score_proportion, criticalz_percentage_proportion):
     then the chance of that happening is p < criticalz_percentage_proportion
     """
     return abs(calculated_z_score_proportion) > scipy.stats.norm.cdf(scipy.stats.norm.ppf((100-criticalz_percentage_proportion)/100.))
+
+
+######## ANALYSIS OF VARIANCE - ANOVA ###########
+"""
+F = Between Group Variability/Within Group Variability
+"""
+f_critical = lambda alpha, dfb, dfw: round(f.isf(alpha, dfb, dfw), 4)
+#between group var
+#xbar_groups is an array of x means
+df_ssb = lambda xbar_groups: float(len(xbar_groups) - 1)
+
+ssb = lambda xg, xbar_groups, each_grp_sample_size: \
+sum([ni * (xbar - xg)**2 for ni, xbar in izip(each_grp_sample_size, xbar_groups)])/df_ssb(xbar_groups)
+
+#within group var
+#x_samples is an array of lists - this is like df for pooled variance
+df_ssw = lambda x_samples: float(reduce(lambda x,y: x+y, imap(len, x_samples)) - len(x_samples))
+
+#this is like pooled variance for more than 2 samples - generic
+ssw = lambda x_samples: sum([var(samples) * len(samples) for samples in x_samples])/df_ssw(x_samples)
+
+#F ratio stats
+anova_ratio = lambda xg, xbar_groups, x_samples, each_grp_sample_size:ssb(xg, xbar_groups, each_grp_sample_size)/ssw(x_samples)
+
+#if greater we reject null hypothesis else we fail to reject
+f_cmp = lambda f_score, f_critical: abs(f_score) > abs(f_critical)
+
+#honesty significant differences - which samples are significantly different?
+calc_tukey_hsd = lambda q, ssw_score, num_samples: q * sqrt(float(ssw_score)/num_samples)
