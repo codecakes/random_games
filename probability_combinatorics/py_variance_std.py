@@ -13,9 +13,15 @@ from math import sqrt, pi, e
 from itertools import izip, imap
 from numpy import var
 import scipy.stats
-
+from pandas import DataFrame
 #zscore, t score, f score
 from scipy.stats import norm, t, f
+
+"""
+access like this df[0.01][38][4] - df[critical percent][df][num of samples]
+#Make sure the q_table csv is in same parent directory else calc_tukey_hsd won't work
+"""
+q_table = DataFrame.from_csv('q_table.csv')
 
 def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
 
@@ -242,5 +248,14 @@ anova_ratio = lambda xg, xbar_groups, x_samples, each_grp_sample_size:ssb(xg, xb
 #if greater we reject null hypothesis else we fail to reject
 f_cmp = lambda f_score, f_critical: abs(f_score) > abs(f_critical)
 
+###### CALCULATING EFFECT MEASURES - measures of significance not due to samplign error or chances #########
+
 #honesty significant differences - which samples are significantly different?
-calc_tukey_hsd = lambda q, ssw_score, num_samples: q * sqrt(float(ssw_score)/num_samples)
+#q = df[critical_per][dfw][num_samples]
+calc_tukey_hsd = lambda critical_per, dfw, ssw_score, num_samples: round(df[critical_per][dfw][num_samples] * sqrt(float(ssw_score)/num_samples), 4)
+
+#cohens d multiple comparisons ANOVA
+cohens_d_multiple = lambda x1,x2,ssw_score: float(x1-x2)/sqrt(ssw_score)
+
+#eta squared
+eta_sqrd = lambda ssb_score, ss: float(ssb_score)/ss  #ss = total or ssb+ssw = \summ((xi - xg)**2)
