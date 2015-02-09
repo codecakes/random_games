@@ -13,17 +13,17 @@ from math import sqrt, pi, e
 from itertools import izip, imap
 from numpy import var
 import scipy.stats
-from pandas import DataFrame
+from pandas import DataFrame, read_pickle
 #zscore, t score, f score
 from scipy.stats import norm, t, f
+
+def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
 
 """
 access like this df[0.01][38][4] - df[critical percent][df][num of samples]
 #Make sure the q_table csv is in same parent directory else calc_tukey_hsd won't work
 """
-q_table = DataFrame.from_csv('q_table.csv')
-
-def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
+q_table = pandas.read_pickle('q_table')
 
 def mean_arr(x):
     sumr = 0.
@@ -146,7 +146,7 @@ def t_cmp(calculated_t, critical_t):
 
 ### Correlation Measures using T Stats ####
 def t_r_squared(t_score, df):
-    #calculated t score
+    #calculated t score cousin of r squared for line fitting - correlation
     """
     R square generally tells us how much of the difference between 2 means
     in a particular hypothetisis is due to the given statistical factors
@@ -250,12 +250,29 @@ f_cmp = lambda f_score, f_critical: abs(f_score) > abs(f_critical)
 
 ###### CALCULATING EFFECT MEASURES - measures of significance not due to samplign error or chances #########
 
+#this can be used when the num of samples per group are not the same N
+var_num_samples = lambda x_samples: len(x_samples)/reduce(lambda n1,n2: (1/float(n1) + 1/float(n2)), imap(len, x_samples))
+
+"""
 #honesty significant differences - which samples are significantly different?
 #q = df[critical_per][dfw][num_samples]
-calc_tukey_hsd = lambda critical_per, dfw, ssw_score, num_samples: round(df[critical_per][dfw][num_samples] * sqrt(float(ssw_score)/num_samples), 4)
+This is how you calculate Q:
+Q = ML—MS /sqrt[MSwg / Np/s]
+k = # of groups
+n = # of elements per group for an experiment where each
+group has same elements, else refer to var_num_samples(x_samples)
+to calculate n;
+"""
+calc_tukey_hsd = lambda critical_per, dfw, ssw_score, k, n: round(q_table[critical_per][dfw][k] * sqrt(float(ssw_score)/n), 4)
+
+def tukey_hsd_cmp(mean_diff, tukey_hsd):
+    """
+    Reject Null if mean diff > tukey hsd
+    """
+    return mean_diff > tukey_hsd
 
 #cohens d multiple comparisons ANOVA
 cohens_d_multiple = lambda x1,x2,ssw_score: float(x1-x2)/sqrt(ssw_score)
 
-#eta squared
+#eta squared - proportion of explained differences - sort of r sqrd
 eta_sqrd = lambda ssb_score, ss: float(ssb_score)/ss  #ss = total or ssb+ssw = \summ((xi - xg)**2)
