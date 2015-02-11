@@ -4,6 +4,16 @@ from scipy.stats import chisqprob
 """
 Chi2 Analysis should be used with Independent Test Subjects
 """
+def calc_chi2_expected_val(original_d, marginal_col_totals, marginal_row_totals, total):
+    """
+    this calculates the expected value matrix;
+    see 'chi2' to see how to calcualte chi2/kai 2 values using
+    orignal/actual value and expected value matrices.
+    """
+    percentage_col = marginal_col_totals/total
+    expected_val = marginal_row_totals.values * percentage_col.values
+    return DataFrame(data = expected_val, index = original_d.index, columns = original_d.columns)
+
 
 def chi2(original,expected):
     """
