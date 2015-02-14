@@ -4,17 +4,15 @@ def quartile_range(arr):
     """
     Find out the Interquartile Range
     """
-    #if array is even
-    if len(arr)%2 == 0:
-        left=arr[:len(r)/2]
-        left = left[len(left)/2]
-        right=arr[len(r)/2:]
-        right = right[len(right)/2]
+    #if it is odd
+    if len(arr)%2 != 0:
+        left=median(arr[:len(arr)/2])
+        right=median(arr[len(arr)/2 + 1:])
     else:
-        #else if it is odd
-        left = median(arr[:len(r)/2])
-        right = median(arr[len(r)/2+1:])
-    return left, right - left, right  #Q1,Q2,Q3
+        #if array is even
+        left = median(arr[:len(arr)/2])
+        right = median(arr[len(arr)/2:])
+    return left, abs(right - left), right  #Q1,Q2,Q3
 
 def outliers_min_max(q1,q2,q3):
     """
@@ -26,3 +24,13 @@ def outliers_min_max(q1,q2,q3):
     is an outlier.
     """
     return q1 - (1.5*q2), q3 + (1.5*q2)
+
+def filter_outlier_df(df):
+    """
+    Filters outliers from DataFrame.
+    df: DataFrame.
+    #col_name: String - Column name of the DataFrame.
+    """
+    q1, q2, q3 = quartile_range(sorted(df))
+    low_bound, upper_bound = outliers_min_max(q1,q2,q3)
+    return df[(df >= low_bound) & (df <= upper_bound)]

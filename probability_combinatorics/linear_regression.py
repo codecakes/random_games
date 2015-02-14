@@ -7,16 +7,16 @@ from py_variance_std import t_percentile
 def calc_slope(r, sdy, sdx): return r * (float(sdy)/sdx)
 
 def line_fitting(x_arr, y_arr):
+    """
+    using straight line y = mx + c;
+    m(of a sample data points) = Covariance(X,Y)/Covariance(X,X) = 
+    E[(X - E(X))(Y - E(Y))]/E[(X - E(X))^2]
+    Another way: Look at calc_slope given STD Y and STD X and r
+    """
     xbar = mean(x_arr)
     ybar = mean(y_arr)
     xsqr_bar = mean([i**2 for i in x_arr])
     xybar = mean([i*j for i,j in izip(x_arr, y_arr)])
-    """
-    using straight line y = mx + c;
-    m(of a sample data points) = Covariance(X,Y)/Covariance(X,X)
-    = E[(X - E(X))(Y - E(Y))]/E[(X - E(X))^2]
-    Another way: Look at calc_slope given STD Y and STD X and r
-    """
     #calcuate the slope m
     m = (xbar*ybar - xybar)/(xbar**2 - xsqr_bar)
     #calculate the y intercept
@@ -98,7 +98,7 @@ def r_squared(x_arr, y_arr):
     #R sqaured
     return 1 - variation_not_by_line #total variation in x, variation in line
 
-def calc_tscore_from_r(r,n):
+def calc_tscore_from_r(r2,n):
     """
     Hypothesis Testing if relationship is due to sampling error.
     r: coefficient of determination
@@ -107,7 +107,7 @@ def calc_tscore_from_r(r,n):
     For looking at critical t val and comparing the t score,
     df = n-2 since there are 2 variables for correlation under test.
     """
-    return r*sqrt(float(n-2)/(1 - r**2))
+    return sqrt(r2*float(n-2)/(1 - r2))
 
 def calc_p_from_tval_from_r(r,n, one_tailed= 0 ):
     return t_percentile(calc_tscore_from_r(r,n), n-2, one_tailed= one_tailed)

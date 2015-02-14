@@ -23,7 +23,7 @@ def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
 access like this df[0.01][38][4] - df[critical percent][df][num of samples]
 #Make sure the q_table csv is in same parent directory else calc_tukey_hsd won't work
 """
-q_table = pandas.read_pickle('q_table')
+q_table = read_pickle('q_table')
 
 def mean_arr(x):
     sumr = 0.
@@ -257,12 +257,13 @@ var_num_samples = lambda x_samples: len(x_samples)/reduce(lambda n1,n2: (1/float
 #honesty significant differences - which samples are significantly different?
 #q = df[critical_per][dfw][num_samples]
 This is how you calculate Q:
-Q = ML—MS /sqrt[MSwg / Np/s]
-k = # of groups
-n = # of elements per group for an experiment where each
+Q = ml - ms / sqrt of mssw / n
+k = num of groups
+n = num of elements per group for an experiment where each
 group has same elements, else refer to var_num_samples(x_samples)
 to calculate n;
 """
+
 calc_tukey_hsd = lambda critical_per, dfw, ssw_score, k, n: round(q_table[critical_per][dfw][k] * sqrt(float(ssw_score)/n), 4)
 
 def tukey_hsd_cmp(mean_diff, tukey_hsd):

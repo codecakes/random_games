@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from scipy.stats import chisqprob
+from scipy.stats import chisqprob, chi2
 
 """
 Chi2 Analysis should be used with Independent Test Subjects
@@ -15,7 +15,7 @@ def calc_chi2_expected_val(original_d, marginal_col_totals, marginal_row_totals,
     return DataFrame(data = expected_val, index = original_d.index, columns = original_d.columns)
 
 
-def chi2(original,expected):
+def chi2_val(original,expected):
     """
     Given 2 dataframes:
     original = DataFrame(data=[(7,16,6),(43,34,44)], index = ['YES','NO'], columns=['HIT', 'SMASHED', 'CONTROL'])
@@ -24,6 +24,11 @@ def chi2(original,expected):
     """
     return ((original-expected)**2/expected).values.sum()
 
+critical_chi2_val_from_p = lambda p, df: \
+round(scipy.stats.chi2.isf(p, df), 3)
+
+p_from_chi2_val = lambda chi2_val, df: \
+scipy.stats.chi2.sf(chi2_val, df)
 
 def chi2_cmp(chi2_val, df, alpha_val):
     """
@@ -34,8 +39,9 @@ def chi2_cmp(chi2_val, df, alpha_val):
 
 def kramers_phi_v(chi2_val, num_samples, d):
     """
-    used when > 2x2 matrix;
-    testing for strength between the two variables
+    Independence Test: tests for strength between the two variables
+    used when >= 2x2 matrix;
+    d: original DataFrame 
     """
     k = min((d.columns.size,d.index.size))
     return sqrt(float(chi2_val)/(num_samples*(k-1)))
