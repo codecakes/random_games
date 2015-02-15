@@ -1,0 +1,766 @@
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Questions for Investigation</p>
+<p>This experiment will require the use of a standard deck of playing cards. This is a deck of fifty-two cards divided into four suits (spades, hearts, diamonds, and clubs), each suit containing thirteen cards (Ace, numbers 2-10, and face cards Jack, Queen, and King). You can use either a physical deck of cards for this experiment or you may use a virtual deck of cards such as that found on random.org (<a href="http://www.random.org/playing-cards/">http://www.random.org/playing-cards/</a>).
+For the purposes of this task, assign each card a value: The Ace takes a value of 1, numbered cards take the value printed on the card, and the Jack, Queen, and King each take a value of 10.</p>
+<ol>
+<li>First, create a histogram depicting the relative frequencies of the card values.</li>
+<li>Now, we will get samples for a new distribution. Shuffle your deck of cards and draw three cards from it. (You will be sampling from the deck without replacement.) Record the cards that you have drawn and the sum of the three cards’ values. Repeat this sampling procedure a total of at least thirty times.</li>
+<li>Let’s take a look at the distribution of the card sums. Report descriptive statistics for the samples you have drawn. Include at least two measures of central tendency and two measures of variability.</li>
+<li>Create a histogram of the sampled card sums you have recorded. Compare its shape to that of the original distribution. How are they different, and can you explain why this is the case?</li>
+<li>Make some estimates about values you will get on future draws. Within what range will you expect approximately 90% of your draw values to fall? What is the approximate probability that you will get a draw value of at least 20? Make sure you justify how you obtained your values.</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="the-rubric-">The Rubric:</h1>
+<p><a href="https://docs.google.com/document/d/1gVCBsThTXBkUtMiccc4Rj5XT8I9h4ji0bpqTe2uUxRg/pub#">^1</a></p>
+<p>Criteria</p>
+<p>Responses to Project Questions</p>
+<p>Question 1: Plotting a histogram of card values</p>
+<p>Question 2: Obtain samples from a deck of cards</p>
+<p>Question 3: Report descriptive statistics regarding sample taken</p>
+<p>Question 4: Plotting a histogram of sampled values</p>
+<p>Question 5: Making estimates based on the sampled distribution</p>
+<p>Does Not Meet Specifications</p>
+<p>Meets Specifications</p>
+<p>The histogram does not accurately reflect the card values’ relative frequency distribution or no histogram is provided.</p>
+<p>A histogram is provided that accurately reflects the card values’ relative frequency distribution.</p>
+<p>Sampled data is not provided, insufficient, or does not reflect the experiment being performed for the project.</p>
+<p>At least thirty samples have been performed and the summed values from each sample have been reported in a submitted spreadsheet.</p>
+<p>Two measures of central tendency and variability are not reported to describe the sample or are not computed correctly.</p>
+<p>At least two measures of central tendency and two measures of variability are accurately reported to summarize and describe the samples taken for Question 2.</p>
+<p>The histogram does not accurately reflect sampled values or no histogram is provided. No discussion of the shape of the distribution is provided or comparison is not well-justified.</p>
+<p>A histogram accurately reflecting the sampled data is provided. Discussion of the shape is provided, including a comparison to that of the histogram of the original card values.</p>
+<p>Estimates made for the prompted questions do not reflect the values obtained from the sample.</p>
+<p>Estimates are made for the prompted questions that reflect the samples taken and their distribution.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets start with a rough draft of generating a deck of cards.
+Lets create 4 suites first.
+Lets create a dictionary of each suite in the deck named <em>deck</em></p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[32]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="o">%</span><span class="k">matplotlib</span> <span class="n">inline</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pylab</span> <span class="kn">import</span> <span class="n">hist</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">var</span>
+
+<span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[13]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">heart_suite</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;H&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;H&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">]</span><span class="o">+</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="s">&#39;Q&#39;</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">]]}</span>
+
+<span class="n">diamond_suite</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;D&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;D&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">]</span><span class="o">+</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="s">&#39;Q&#39;</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">]]}</span>
+
+<span class="n">club_suite</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;C&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;C&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">]</span><span class="o">+</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="s">&#39;Q&#39;</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">]]}</span>
+
+<span class="n">spade_suite</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;S&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;S&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;A&#39;</span><span class="p">]</span><span class="o">+</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">11</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="s">&#39;J&#39;</span><span class="p">,</span> <span class="s">&#39;Q&#39;</span><span class="p">,</span> <span class="s">&#39;K&#39;</span><span class="p">]]}</span>
+
+<span class="n">deck</span> <span class="o">=</span> <span class="p">(</span><span class="n">heart_suite</span><span class="p">,</span> <span class="n">diamond_suite</span><span class="p">,</span> <span class="n">club_suite</span><span class="p">,</span> <span class="n">spade_suite</span><span class="p">)</span>
+
+<span class="n">deck</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:{</span><span class="n">value</span><span class="p">:</span><span class="n">num</span><span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">num</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cardict</span><span class="p">[</span><span class="n">k</span><span class="p">])}</span> <span class="k">for</span> <span class="n">cardict</span> <span class="ow">in</span> <span class="n">deck</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">cardict</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()}</span>
+
+<span class="k">print</span> <span class="n">deck</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+{&apos;S&apos;: {&apos;QS&apos;: 12, &apos;2S&apos;: 2, &apos;3S&apos;: 3, &apos;4S&apos;: 4, &apos;5S&apos;: 5, &apos;JS&apos;: 11, &apos;KS&apos;: 13, &apos;AS&apos;: 1, &apos;6S&apos;: 6, &apos;7S&apos;: 7, &apos;10S&apos;: 10, &apos;8S&apos;: 8, &apos;9S&apos;: 9}, &apos;H&apos;: {&apos;9H&apos;: 9, &apos;8H&apos;: 8, &apos;6H&apos;: 6, &apos;AH&apos;: 1, &apos;KH&apos;: 13, &apos;10H&apos;: 10, &apos;7H&apos;: 7, &apos;3H&apos;: 3, &apos;JH&apos;: 11, &apos;5H&apos;: 5, &apos;4H&apos;: 4, &apos;QH&apos;: 12, &apos;2H&apos;: 2}, &apos;C&apos;: {&apos;KC&apos;: 13, &apos;AC&apos;: 1, &apos;6C&apos;: 6, &apos;7C&apos;: 7, &apos;8C&apos;: 8, &apos;9C&apos;: 9, &apos;QC&apos;: 12, &apos;2C&apos;: 2, &apos;3C&apos;: 3, &apos;10C&apos;: 10, &apos;4C&apos;: 4, &apos;5C&apos;: 5, &apos;JC&apos;: 11}, &apos;D&apos;: {&apos;7D&apos;: 7, &apos;6D&apos;: 6, &apos;AD&apos;: 1, &apos;KD&apos;: 13, &apos;9D&apos;: 9, &apos;8D&apos;: 8, &apos;2D&apos;: 2, &apos;10D&apos;: 10, &apos;JD&apos;: 11, &apos;5D&apos;: 5, &apos;4D&apos;: 4, &apos;QD&apos;: 12, &apos;3D&apos;: 3}}
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets create a function to pick a pseudo random card out of 4 randomly selected cards from the dictionary of 4 suites.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[14]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">random_deck_card</span><span class="p">(</span><span class="n">deck</span><span class="p">):</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="p">({</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">deck</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> \
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> \
+    <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">deck</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> \
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">deck</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()]})</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">selection</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">res</span><span class="p">,</span> <span class="n">selection</span><span class="p">[</span><span class="n">res</span><span class="p">]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets create a function to generate as asked in the question, a list of 30 samples with each of their sums, from 3 random selections using random_deck_card and <em>deck</em> </p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[15]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">sum_shuffled_cards</span><span class="p">(</span><span class="n">deck</span><span class="p">,</span> <span class="n">mini_range</span><span class="p">,</span> <span class="n">grand_range</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">sum</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])))([</span><span class="n">random_deck_card</span><span class="p">(</span><span class="n">deck</span><span class="p">)</span> \
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">mini_range</span><span class="p">)])</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">grand_range</span><span class="p">)]</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[26]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="c">#the historgram of this is almost uniform. for instance;</span>
+<span class="n">all_cards</span> <span class="o">=</span> <span class="nb">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">),</span> <span class="p">[[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dct</span><span class="p">))]</span> <span class="k">for</span> <span class="n">dct</span> <span class="ow">in</span> <span class="n">deck</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()])</span>
+
+<span class="k">print</span> <span class="n">hist</span><span class="p">(</span><span class="n">all_cards</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+(array([ 8.,  4.,  4.,  4.,  4.,  8.,  4.,  4.,  4.,  8.]), array([  0. ,   1.2,   2.4,   3.6,   4.8,   6. ,   7.2,   8.4,   9.6,
+        10.8,  12. ]), &lt;a list of 10 Patch objects&gt;)
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets create a histogram of 30 samples from 3 randomly picked cards each time.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[33]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">shuffled_cards</span> <span class="o">=</span> <span class="n">sum_shuffled_cards</span><span class="p">(</span><span class="n">deck</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">hist</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">shuffled_cards</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+(array([ 1.,  2.,  2.,  4.,  2.,  5.,  5.,  4.,  3.,  2.]), array([  6. ,   8.7,  11.4,  14.1,  16.8,  19.5,  22.2,  24.9,  27.6,
+        30.3,  33. ]), &lt;a list of 10 Patch objects&gt;)
+
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+iTUABGTaV9gAgNkjo590XLx4sWpraxWLxbRy5cpszRSY9vZ2RSIR1dTUJD72xx9/qKWlRY899pjW
+rFmja9euBThhZibbX0dHhyoqKhSLxRSLxdTV1RXghOnr6elRc3OzqqurtXz5cu3bt09SeM5vqv2F
+5fxGRkbU0NCgaDSqqqoq7dixQ1J4zm+q/c30/DJ6hb1kyRKdPXtWZWVl6V5iVjl16pRKSkr00ksv
+6cKFC5Kk7du36+GHH9b27du1e/duXb16Ve+8807Ak6Znsv3t2rVLDzzwgF5//fWAp8tMf3+/+vv7
+FY1GNTQ0pPr6enV2durAgQOhOL+p9vfZZ5+F4vwkaXh4WMXFxRodHVVjY6P27NmjI0eOhOL8pMn3
+d/z48RmdX8b/LZEw3VFpampSaWnp3z525MgRtbW1SZLa2trU2dkZxGhZMdn+pHCc4YIFCxSNRiVJ
+JSUlqqysVG9vb2jOb6r9SeE4P0kqLi6WJN28eVNjY2MqLS0NzflJk+9Pmtn5ZRRsz/O0evVqrVix
+Qvv378/kUrPWwMCAIpGIJCkSiWhgYCDgibLvgw8+UF1dnbZu3Wr2j5x/dfHiRZ07d04NDQ2hPL87
++3vyySclhef8xsfHFY1GFYlEErd/wnR+k+1PmuH5uQxcvnzZOefcr7/+6urq6tzJkyczudys8Msv
+v7jly5cnfj137ty/fb60tDTfI2XVxP0NDAy48fFxNz4+7t58803X3t4e4HSZGxwcdE888YQ7fPiw
+cy585zc4OOjq6+sT+wvb+Tnn3LVr11xDQ4P75ptvQnd+zv1vfydOnJjx+WX0Cru8vFySNG/ePG3c
+uFHd3d2ZXG5WikQi6u/vlyT19fVp/vz5AU+UXfPnz5fnefI8T9u2bTN9hrdu3VJra6u2bNmiDRs2
+SArX+d3Z3+bNmxP7C9P53TFnzhytW7dOZ8+eDdX53XFnf2fOnJnx+aUd7OHhYQ0ODkqSrl+/rmPH
+jv3tXx+ExbPPPquDBw9Kkg4ePJj4RgmLvr6+xPuHDx82e4bOOW3dulVVVVV69dVXEx8Py/lNtb+w
+nN+VK1cStwNu3Lihr7/+WrFYLDTnN9X+7vxmJKV4fum+rP/5559dXV2dq6urc9XV1e6tt95K91Kz
+xqZNm1x5ebkrKipyFRUV7uOPP3a///67W7VqlVu6dKlraWlxV69eDXrMtE3c30cffeS2bNniampq
+XG1trXvuuedcf39/0GOm5dSpU87zPFdXV+ei0aiLRqPuq6++Cs35Tba/o0ePhub8vv/+exeLxVxd
+XZ2rqalx7777rnPOheb8ptrfTM+PH5wBACP4X4QBgBEEGwCMINgAYATBBgAjCDYAGEGwAcAIgg0A
+RhBsADDiP8kL+ZBZ+akVAAAAAElFTkSuQmCC
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets see the shuffled cards</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[34]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">pprint</span><span class="p">(</span><span class="n">shuffled_cards</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+[([(&apos;H&apos;, 8), (&apos;C&apos;, 3), (&apos;D&apos;, 5)], 16),
+ ([(&apos;C&apos;, 10), (&apos;H&apos;, 2), (&apos;H&apos;, 11)], 23),
+ ([(&apos;H&apos;, 3), (&apos;S&apos;, 2), (&apos;H&apos;, 4)], 9),
+ ([(&apos;C&apos;, 10), (&apos;D&apos;, 1), (&apos;H&apos;, 10)], 21),
+ ([(&apos;D&apos;, 8), (&apos;H&apos;, 12), (&apos;H&apos;, 12)], 32),
+ ([(&apos;H&apos;, 4), (&apos;S&apos;, 2), (&apos;D&apos;, 9)], 15),
+ ([(&apos;D&apos;, 1), (&apos;H&apos;, 4), (&apos;C&apos;, 1)], 6),
+ ([(&apos;D&apos;, 2), (&apos;S&apos;, 12), (&apos;D&apos;, 12)], 26),
+ ([(&apos;S&apos;, 3), (&apos;D&apos;, 2), (&apos;H&apos;, 8)], 13),
+ ([(&apos;H&apos;, 10), (&apos;H&apos;, 8), (&apos;S&apos;, 8)], 26),
+ ([(&apos;C&apos;, 6), (&apos;S&apos;, 9), (&apos;C&apos;, 3)], 18),
+ ([(&apos;D&apos;, 7), (&apos;C&apos;, 10), (&apos;S&apos;, 12)], 29),
+ ([(&apos;S&apos;, 1), (&apos;C&apos;, 1), (&apos;S&apos;, 8)], 10),
+ ([(&apos;S&apos;, 2), (&apos;D&apos;, 9), (&apos;D&apos;, 11)], 22),
+ ([(&apos;D&apos;, 3), (&apos;C&apos;, 6), (&apos;S&apos;, 7)], 16),
+ ([(&apos;D&apos;, 11), (&apos;S&apos;, 6), (&apos;S&apos;, 11)], 28),
+ ([(&apos;D&apos;, 11), (&apos;D&apos;, 9), (&apos;C&apos;, 6)], 26),
+ ([(&apos;S&apos;, 7), (&apos;D&apos;, 10), (&apos;H&apos;, 12)], 29),
+ ([(&apos;H&apos;, 8), (&apos;D&apos;, 5), (&apos;D&apos;, 6)], 19),
+ ([(&apos;D&apos;, 6), (&apos;S&apos;, 11), (&apos;H&apos;, 6)], 23),
+ ([(&apos;C&apos;, 5), (&apos;D&apos;, 9), (&apos;D&apos;, 2)], 16),
+ ([(&apos;C&apos;, 11), (&apos;H&apos;, 12), (&apos;H&apos;, 10)], 33),
+ ([(&apos;H&apos;, 2), (&apos;C&apos;, 10), (&apos;S&apos;, 8)], 20),
+ ([(&apos;H&apos;, 7), (&apos;S&apos;, 13), (&apos;D&apos;, 4)], 24),
+ ([(&apos;S&apos;, 11), (&apos;D&apos;, 10), (&apos;H&apos;, 3)], 24),
+ ([(&apos;S&apos;, 3), (&apos;H&apos;, 7), (&apos;C&apos;, 3)], 13),
+ ([(&apos;H&apos;, 8), (&apos;C&apos;, 2), (&apos;D&apos;, 11)], 21),
+ ([(&apos;C&apos;, 13), (&apos;S&apos;, 11), (&apos;C&apos;, 3)], 27),
+ ([(&apos;H&apos;, 5), (&apos;D&apos;, 6), (&apos;C&apos;, 9)], 20),
+ ([(&apos;C&apos;, 8), (&apos;S&apos;, 11), (&apos;H&apos;, 5)], 24)]
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Lets analyze the sample distribution of samples.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[47]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">sum_samples</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">shuffled_cards</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+
+
+<span class="c">#standard error</span>
+<span class="n">all_cards_std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">all_cards</span><span class="p">)</span>
+<span class="n">se</span> <span class="o">=</span> <span class="n">all_cards_std</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sum_samples</span><span class="p">))</span>
+
+<span class="c">#mean</span>
+<span class="n">sum_samples_mean</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">sum_samples</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Average of list of Sum of all samples: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sum_samples_mean</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">hist</span><span class="p">(</span><span class="n">sum_samples</span><span class="p">)</span>
+<span class="c">#std deviation</span>
+<span class="n">sum_sample_std</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([(</span><span class="n">x</span> <span class="o">-</span> <span class="n">sum_samples_mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sum_samples</span><span class="p">])</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sum_samples</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Unbiased STD DEV of list of sum of all samples std: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sum_sample_std</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Standard Error of distribution of 30 sample size of 3 samples each: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">se</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&quot;Average of list of Sum of all cards: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">all_cards</span><span class="p">))</span>
+<span class="k">print</span> <span class="n">hist</span><span class="p">(</span><span class="n">all_cards</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;STD DEV Of all Cards in a suite: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">all_cards_std</span><span class="p">)</span>
+
+
+<span class="c">#the histrogram plot - averaging at around 20.9666666667</span>
+<span class="k">print</span> <span class="n">hist</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">shuffled_cards</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+Average of list of Sum of all samples: 20.9666666667
+
+(array([ 1.,  2.,  2.,  4.,  2.,  5.,  5.,  4.,  3.,  2.]), array([  6. ,   8.7,  11.4,  14.1,  16.8,  19.5,  22.2,  24.9,  27.6,
+        30.3,  33. ]), &lt;a list of 10 Patch objects&gt;)
+
+Unbiased STD DEV of list of sum of all samples std: 45.9643678161
+
+Standard Error of distribution of 30 sample size of 3 samples each: 0.683130051064
+
+Average of list of Sum of all cards: 6.0
+
+(array([ 8.,  4.,  4.,  4.,  4.,  8.,  4.,  4.,  4.,  8.]), array([  0. ,   1.2,   2.4,   3.6,   4.8,   6. ,   7.2,   8.4,   9.6,
+        10.8,  12. ]), &lt;a list of 10 Patch objects&gt;)
+STD DEV Of all Cards in a suite: 3.74165738677
+
+(array([ 1.,  2.,  2.,  4.,  2.,  5.,  5.,  4.,  3.,  2.]), array([  6. ,   8.7,  11.4,  14.1,  16.8,  19.5,  22.2,  24.9,  27.6,
+        30.3,  33. ]), &lt;a list of 10 Patch objects&gt;)
+
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>There are 2 histograms.
+Green: Distribution of all cards in a Deck- The distribution is uniform because each card is exactly 4 in number.
+Re: Distribution shows almost a normal curve. This is because we took 30 samples fo 3 random picks of cards per turn and it shows the most likely/frequent value it sums upto, averaging at around 20.96 ~ 21 - which mean on an average the 3 rounds we picked, summed up to around 21. Had we taken not <strong>sum</strong> but <strong>MEAN</strong> and then sampled them, it would have been more normal, smoother, skinnier. </p>
+<p>Now lets, calculate the SE, Mean and Standard Deviation of this sample of mean plot against the SE, Mean and Standard Deviation of the plot for summed samples. It is shone in the graph below of what happens if we dont sum but take Mean of each times and then take 30 samples of each mean, what will be its mean.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[48]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre><span class="n">shuffled_cards_sample_mean</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">each_stack</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span> <span class="k">for</span> <span class="n">each_stack</span> <span class="ow">in</span> <span class="n">shuffled_cards</span><span class="p">]</span>
+<span class="k">print</span> <span class="n">hist</span><span class="p">(</span><span class="n">shuffled_cards_sample_mean</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">hist</span><span class="p">(</span><span class="n">sum_samples</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Average of list of Sum of all samples: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sum_samples_mean</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Unbiased STD DEV of list of sum of all samples std: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sum_sample_std</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Standard Error of distribution of 30 sample size of 3 samples each: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">se</span><span class="p">)</span>
+
+
+<span class="c">#mean and std deviation</span>
+<span class="n">mean_shuffled_cards_sample_mean</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">shuffled_cards_sample_mean</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;Average of list of Mean of all samples: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_shuffled_cards_sample_mean</span><span class="p">)</span>
+<span class="n">shuffled_cards_sample_mean_std</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean_shuffled_cards_sample_mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shuffled_cards_sample_mean</span><span class="p">])</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shuffled_cards_sample_mean</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">Unbiased STD DEV of list of sum of all samples std: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shuffled_cards_sample_mean_std</span><span class="p">)</span>
+<span class="n">mean_se</span> <span class="o">=</span> <span class="n">std</span><span class="p">(</span><span class="n">shuffled_cards_sample_mean</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">shuffled_cards_sample_mean</span><span class="p">))</span>
+<span class="k">print</span> <span class="s">&quot;Standard Error of distribution of 30 sample size of 3 samples each: {}</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mean_se</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+(array([ 1.,  2.,  2.,  4.,  2.,  5.,  5.,  4.,  3.,  2.]), array([  2. ,   2.9,   3.8,   4.7,   5.6,   6.5,   7.4,   8.3,   9.2,
+        10.1,  11. ]), &lt;a list of 10 Patch objects&gt;)
+(array([ 1.,  2.,  2.,  4.,  2.,  5.,  5.,  4.,  3.,  2.]), array([  6. ,   8.7,  11.4,  14.1,  16.8,  19.5,  22.2,  24.9,  27.6,
+        30.3,  33. ]), &lt;a list of 10 Patch objects&gt;)
+
+Average of list of Sum of all samples: 20.9666666667
+
+
+Unbiased STD DEV of list of sum of all samples std: 45.9643678161
+
+Standard Error of distribution of 30 sample size of 3 samples each: 0.683130051064
+
+Average of list of Mean of all samples: 6.98888888889
+
+
+Unbiased STD DEV of list of sum of all samples std: 5.10715197957
+
+Standard Error of distribution of 30 sample size of 3 samples each: 0.405664622574
+
+
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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
+Ya1atUrHjx9XZWVl3oMCALKT9pJIcXGxjhw5omeeeUYjIyNqbGwk1gAQkrSvsAEA00den3S0/qGa
+iooKrVixQrFYTKtWrQp7HF+7du1SJBJRdXX12G2///676uvrtWTJEm3YsEF//vlniBOml2r+RCKh
+8vJyxWIxxWKxsX8vmW66u7tVV1enZcuWafny5Tp8+LAkO+s/2fxW1n9gYEC1tbWKRqOqqqrSvn37
+JNlZ/8nmz3r9XY6Gh4fdokWLXGdnpxscHHQ1NTXu4sWLuR4uFBUVFe7atWthj5Gxs2fPugsXLrjl
+y5eP3fbaa6+5Q4cOOeece/PNN93evXvDGs9XqvkTiYR75513QpwqMz09Pa69vd0559z169fdkiVL
+3MWLF82s/2TzW1l/55zr7+93zjk3NDTkamtr3blz58ysv3Op5892/XN+hX2vfKjGGboitGbNGs2Z
+M+eO277++mvt3LlTkrRz5059+eWXYYyWkVTzSzYegwULFigajUqSSktLVVlZqcuXL5tZ/8nml2ys
+vyTNmHHr7b6Dg4MaGRnRnDlzzKy/lHp+Kbv1zznY98KHajzP0/r167Vy5UodPXo07HFy0tvbq0gk
+IkmKRCLq7e0NeaLsvffee6qpqVFjY+O0/ZV2vK6uLrW3t6u2ttbk+t+e/8knn5RkZ/1HR0cVjUYV
+iUTGLu9YWv9U80vZrX/Owb4X3n/d2tqq9vZ2nTp1Su+//77OnTsX9kh58TzP3OPy0ksvqbOzUx0d
+HSorK9Orr74a9khp9fX1qaGhQU1NTZo5c+Yd2yysf19fn7Zu3aqmpiaVlpaaWv+ioiJ1dHTo0qVL
+Onv2rFpaWu7YPt3Xf+L8yWQy6/XPOdiPPPKIuru7x/7c3d2t8vLyXA8XirKyMknSvHnztGXLFrW1
+tYU8UfYikYiuXLkiSerp6dH8+fNDnig78+fPH/tB271797R+DIaGhtTQ0KAdO3Zo8+bNkmyt/+35
+t2/fPja/pfW/bfbs2dq4caO+//57U+t/2+35z58/n/X65xzslStX6ueff1ZXV5cGBwf1+eefa9Om
+TbkeLnA3btzQ9evXJUn9/f06ffr0He9esGLTpk06duyYJOnYsWNjP4hW9PT0jH39xRdfTNvHwDmn
+xsZGVVVVac+ePWO3W1n/yea3sv5Xr14du1xw8+ZNnTlzRrFYzMz6Tzb/7b9spAzXP59/9Tx58qRb
+smSJW7RokTt48GA+hwrcL7/84mpqalxNTY1btmyZifm3bdvmysrKXElJiSsvL3cffvihu3btmlu3
+bp1bvHixq6+vd3/88UfYY05q4vwffPCB27Fjh6uurnYrVqxwzz33nLty5UrYY6Z07tw553meq6mp
+cdFo1EWjUXfq1Ckz659q/pMnT5pZ/x9++MHFYjFXU1Pjqqur3VtvveWcc2bWf7L5s11/PjgDAEbw
+X4QBgBEEGwCMINgAYATBBgAjCDYAGEGwAcAIgg0ARhBsADDi/wFP0kSBwXkFswAAAABJRU5ErkJg
+gg==
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>As we can see from above, the difference between sampling:</p>
+<ol>
+<li>Means
+and</li>
+<li>Sums
+is the thickness of distribution.</li>
+</ol>
+<p>We can note:</p>
+<ol>
+<li>Standard Error of distribution of 30 sample size of mean of 3 samples each: 0.405664622574
+while,</li>
+<li>Standard Error of distribution of 30 sample size of sum of 3 samples each: 0.683130051064;</li>
+</ol>
+<p>which means SE of Mean Samples is lower than of Sum Samples.
+and
+Average has come down from ~21 to 6.98888888889 which is alot closer to Average of list of Sum of all cards: 6.0;</p>
+<p>However, In the function <strong>sum_shuffled_cards</strong> If we raise the mini_range from 3 to say 30 and grand_range from 30 to 1000, the curve will be even smoother and skinnier with narrower tails meaning, the average will become more defined and precise.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">
+In&nbsp;[]:
+</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class="highlight"><pre> 
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
