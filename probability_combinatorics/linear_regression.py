@@ -9,7 +9,7 @@ def calc_slope(r, sdy, sdx): return r * (float(sdy)/sdx)
 def line_fitting(x_arr, y_arr):
     """
     using straight line y = mx + c;
-    m(of a sample data points) = Covariance(X,Y)/Covariance(X,X) = 
+    m(of a sample data points) = Covariance(X,Y)/Covariance(X,X) =
     E[(X - E(X))(Y - E(Y))]/E[(X - E(X))^2]
     Another way: Look at calc_slope given STD Y and STD X and r
     """
@@ -38,6 +38,7 @@ def line_error(**params):
             m,c = params['m'], params['c']
         else:
             y, m, x, c = line_fitting(params['x_arr'], params['y_arr'])
+        #return difference magnitude between y,actual - y,calculated/predicted
         return [(yi - ((m*xi)+c))**2 for yi,xi in izip(params['y_arr'], params['x_arr'])]
 
 
@@ -68,6 +69,7 @@ def std_error_linear(se_y, x_line_std):
     return se_y/x_line_std
 
 def find_std_err_linear(x_arr, y_arr, n_sample):
+    #Find SE of SEy/SEx
     #find descriptive params
     ybar,m,xbar,c = line_fitting(x_arr, y_arr)
     #find error in x

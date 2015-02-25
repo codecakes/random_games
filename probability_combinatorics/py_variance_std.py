@@ -15,7 +15,7 @@ from numpy import var
 import scipy.stats
 from pandas import DataFrame, read_pickle
 #zscore, t score, f score
-from scipy.stats import norm, t, f
+from scipy.stats import norm, t, f, manwhitneyu, shapiro
 
 def mean(x): return reduce(lambda a,b: (a+b), x)/float(len(x))
 
@@ -53,12 +53,15 @@ def std_deviation_unbiased(x):
 
 
 def normal_distro_probability(x, xbar, var):
-    z2 = float(x-xbar)**2/var  #z squared
+    z2 = float(x-xbar)**2/(2*var)  #z squared
     return 1./sqrt((2*pi*var) * (e**z2))
 
 
 def normal_sample_variance(original_var, sample_size):
-    """given original variance but not all data points"""
+    """
+    given original variance but not all data points.
+    sqrt(var/n) = Std. Error
+    """
     return original_var/sample_size
 
 
@@ -69,10 +72,22 @@ se = lambda sd, sample_size: (sd/sqrt(sample_size))
 
 def se_independent_sample(sd1, sd2, n1, n2):
     """
+    1. WELCH's T TEST
+    2. USE WHEN WE CMP 2 DIFF MEANS
+    ---------------------------------
     Useful for finding out
     CI and comparing Z stats Given a population metric
     """
     return sqrt((sd1**2 + sd2**2)/float(n1)) if n1==n2 else sqrt((sd1**2/float(n1)) + (sd2**2/float(n2)))
+
+
+def df_two_sampled_welch(var1, var2, n1, n2):
+    #IMP dof FUNC!!
+    #2 sample Deg of Freedom for 2 Sample Welch's T Test
+    df1, df2 = n1-1, n2-1
+    return float(var1/float(n1) + var2/float(n2))**2/\
+    float((var1**2/float(n1**2 * df1)) + (var2**2/float(n2**2 * df2)))
+
 
 pooled_variance = lambda x,y,n1,n2: ((var(x)*n1) + (var(y)*n2))/float(n1+n2-2)
 
@@ -114,9 +129,13 @@ def calc_probability_sample_mean(mu, xbar, sd, sample_size):
     #calculate percentage from z score
     return scipy.stats.norm.cdf(calc_z(mu, xbar, sd, sample_size))
 
-def calc_t(mu, xbar, sd, sample_size): return round(calc_z(mu, xbar, sd, sample_size), 2)
+def calc_t(mu, xbar, sd, sample_size):
+    #calculating critical t
+    return round(calc_z(mu, xbar, sd, sample_size), 2)
 
-def calc_t_independent_sample(mu, xbar, se): return round(float(xbar-mu)/se, 2)
+def calc_t_independent_sample(mu, xbar, se):
+    #calculating critical t when se is given/independent samples
+    return round(float(xbar-mu)/se, 2)
 
 def t_percentile(t_val, df, one_tailed=0):
     """
@@ -127,11 +146,12 @@ def t_percentile(t_val, df, one_tailed=0):
 def critical_t(percentile, df, one_tailed):
     return round(t.isf((100-percentile)/100., df), 3) if one_tailed else round(t.isf((100-percentile)/200., df), 3)
 
-#same as above, but in proportion
+#same as critical_t, but in proportion
 def t_val_from_t_percentile(t_percentile, df, one_tailed = 0):
     """
     Find T score given T percentile, DF
     and if its 1 Tailed or 2 Tailed
+    t_percentile: % in proportion
     """
     return round(t.isf(t_percentile, df), 3) if one_tailed else round(t.isf(t_percentile/2., df), 3)
 
@@ -248,7 +268,7 @@ anova_ratio = lambda xg, xbar_groups, x_samples, each_grp_sample_size:ssb(xg, xb
 #if greater we reject null hypothesis else we fail to reject
 f_cmp = lambda f_score, f_critical: abs(f_score) > abs(f_critical)
 
-###### CALCULATING EFFECT MEASURES - measures of significance not due to samplign error or chances #########
+###### CALCULATING EFFECT MEASURES (TUKEYS HSD)- measures of significance not due to samplign error or chances #########
 
 #this can be used when the num of samples per group are not the same N
 var_num_samples = lambda x_samples: len(x_samples)/reduce(lambda n1,n2: (1/float(n1) + 1/float(n2)), imap(len, x_samples))
@@ -259,8 +279,7 @@ var_num_samples = lambda x_samples: len(x_samples)/reduce(lambda n1,n2: (1/float
 This is how you calculate Q:
 Q = ml - ms / sqrt of mssw / n
 k = num of groups
-n = num of elements per group for an experiment where each
-group has same elements, else refer to var_num_samples(x_samples)
+n = Total num of elements per group across all groups for an experiment where each group has same elements, else refer to var_num_samples(x_samples)
 to calculate n;
 """
 
@@ -276,4 +295,25 @@ def tukey_hsd_cmp(mean_diff, tukey_hsd):
 cohens_d_multiple = lambda x1,x2,ssw_score: float(x1-x2)/sqrt(ssw_score)
 
 #eta squared - proportion of explained differences - sort of r sqrd
-eta_sqrd = lambda ssb_score, ss: float(ssb_score)/ss  #ss = total or ssb+ssw = \summ((xi - xg)**2)
+#Analogous to R squared Difference of T Test;
+eta_sqrd = lambda ssb_score, ss: float(ssb_score)/ss
+#ss = total or ssb+ssw = \summ((xi - xg)**2) summation of all xi minus grand xg
+
+
+######## OTHER TESTS ON NON GAUSSIAN DATASETS ###############
+"""
+Man - Whitney U-Test
+u,p = manwhitneyu(x_arr, y_arr)
+Non-parametric test;
+- non-normal data
+- find descriptive variables.
+"""
+manwhitneyu_test = lambda x_arr, y_arr: manwhitneyu(x_arr, y_arr)
+
+"""
+Shapiro-Wilk Test
+- Plot Histogram to check for Bell Curve
+- Perform Shapiro-Wilk Test
+s, p = shapiro(x_arr)
+"""
+shapiro_test = lambda x_arr: shapiro(x_arr)
