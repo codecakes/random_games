@@ -11,19 +11,16 @@ either Sliced list or Original List.
 Turn on the comments to see what's happening.
 """
 
-def cmp_sort(l1, l2, alist, index, grand_iter):
-    iter_count = 0
-    second_while = 0
+def cmp_sort(l1, l2, alist, index):
     #given two sorted arrays
     i = j = inc = incmax = 0
     #print "the list {}\n".format(alist)
-    smaller,larger = (l1,l2) if(len(l1)<len(l2)) else (l2,l1)
+    smaller,larger = (l1,l2) if(len(l1)<=len(l2)) else (l2,l1)
     #print "left {} right {}\n".format(smaller, larger)
     imax = len(smaller)
     jmax = len(larger)
 
     while (i < imax) and (j < jmax):
-        iter_count += 1
         if smaller[i] > larger[j]:
             alist[index] = larger[j]
             j += 1
@@ -33,8 +30,6 @@ def cmp_sort(l1, l2, alist, index, grand_iter):
             i += 1
             index += 1
         #print "index i {} j {} index {}".format(i,j, index)
-
-
     if jmax - j < imax - i:
         inc = i
         incmax = imax
@@ -45,29 +40,23 @@ def cmp_sort(l1, l2, alist, index, grand_iter):
         l = larger
 
     while incmax != inc:
-        second_while += 1
         alist[index] = l[inc]
         inc += 1
         index += 1
-
     #print "list: {}".format(alist)
-    grand_iter[0] += max((second_while, iter_count))
-    print grand_iter
     return alist
 
-def merge_sort_rec(alist, grand_iter = [0], index = 0):
+def merge_sort_rec(alist, index = 0):
     ln = len(alist)
     mid = ln//2
-    grand_iter[0] += 1
     #print "index is {}".format(index)
     #break down until base case of len =1 remains
     if mid >= 1:
         #print "Splitting...{}\n".format(alist)
-        left = merge_sort_rec(alist[:mid], grand_iter = grand_iter)
-        right = merge_sort_rec(alist[mid:], grand_iter = grand_iter)
+        left = merge_sort_rec(alist[:mid])
+        right = merge_sort_rec(alist[mid:])
         #print "left {}\n".format(left)
         #print "right {}\n".format(right)
-        return cmp_sort(left, right, alist, index, grand_iter)
+        return cmp_sort(left, right, alist, index)
     else:
-        print grand_iter
         return alist
