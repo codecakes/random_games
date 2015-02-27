@@ -1,3 +1,7 @@
+"""
+Uncomment to see the flow of Operation.
+"""
+
 from math import sqrt
 from numpy import inf
 
@@ -19,7 +23,7 @@ def bfd(alist):
             if ds < min_d:
                 min_d = ds
                 pair = p1, p2
-    print "min_d, pair: {} {}\nbfd list: {}\n".format(min_d, pair, alist)
+    #print "min_d, pair: {} {}\nbfd list: {}\n".format(min_d, pair, alist)
     return min_d, pair
                  
     
@@ -45,11 +49,11 @@ def split_conquer(alist):
     if ln <= 3:
         #find the min distance between the 2 points using brute force 
         #and return the min_d and point pair
-        print "list going in bfd {}\n".format(alist)
+        #print "list going in bfd {}\n".format(alist)
         min_d, pair = bfd(alist)
         return min_d, pair
     else:
-        print "Splitting {}\n".format(alist)
+        #print "Splitting {}\n".format(alist)
         left_list = alist[:mid]
         left_min_d, left_pair = split_conquer(left_list)
         right_list = alist[mid:]
@@ -74,21 +78,20 @@ def split_conquer(alist):
         
         #Now for filter all the points within (mid +/- xbase_delta) by x
         #Using Brute Force, find the min of all those filtered points and previous min
-        print "Points being filtered {}\n".format(alist)
-        print "delta - mid {} delta + mid {}\n".format(alist[mid][0] - xbase_delta,\
-        alist[mid][0] + xbase_delta)
+        #print "Points being filtered {}\n".format(alist)
+        #print "mid - delta {} mid + delta {}\n".format(alist[mid][0] - xbase_delta, alist[mid][0] + xbase_delta)
         
         filtered_pts = filter(lambda points: \
         (alist[mid][0] - xbase_delta <= points[0] <= alist[mid][0])\
         or (alist[mid][0] <= points[0] <= alist[mid][0] + xbase_delta), alist)
         
-        print "filtered_pts:{}\n".format(filtered_pts)
+        #print "filtered_pts:{}\n".format(filtered_pts)
         if len(filtered_pts)==1:
             return inf, filtered_pts[0]
         
         filtered_min, pair = bfd(filtered_pts)
         
-        print "current MINIMUM {}\n".format(filtered_min)
+        #print "current MINIMUM {}\n".format(filtered_min)
         
         #return this min distance and the point pair
         return (filtered_min, pair) \
@@ -96,10 +99,25 @@ def split_conquer(alist):
 
 if __name__ == "__main__":
     from numpy.random import randint
+    from cProfile import run
+    import time
+    from matplotlib.pyplot import plot
     #alist = [(9, 0), (7, 0), (6, 2), (3, 6), (4, 2), (4, 3), (2, 0), (4, 5), (1, 3), (2, 6)]
-    alist = [(randint(0,10),randint(0,10)) for _ in xrange(11)]
-    x,y = zip(*sorted(alist, key =lambda i: i[0]))
-    alist = zip(x,y)
-    #print bfd(alist)
-    print "sorted list: {}\n".format(alist)
-    print split_conquer(alist)
+    tmp = []
+    for n in xrange(11, 1000):
+        up_bound = randint(1,n)
+        alist = [(randint(0,up_bound),randint(0,up_bound)) for _ in xrange(n)]
+        x,y = zip(*sorted(alist, key =lambda i: i[0]))
+        alist = zip(x,y)
+        #print bfd(alist)
+        #print "sorted list: {}\n".format(alist)
+        start = time.time()
+        #run("split_conquer(alist)")
+        #print split_conquer(alist)
+        end=time.time()-start
+        #print "finished in {}\n".format(end)
+        tmp.append((len(alist), end))
+    
+    size, tym = zip(*tmp)
+    #interestingly it did scale
+    plot(size, tym)
