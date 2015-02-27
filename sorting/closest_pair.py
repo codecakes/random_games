@@ -104,7 +104,7 @@ if __name__ == "__main__":
     from matplotlib.pyplot import plot
     #alist = [(9, 0), (7, 0), (6, 2), (3, 6), (4, 2), (4, 3), (2, 0), (4, 5), (1, 3), (2, 6)]
     tmp = []
-    for n in xrange(11, 1000):
+    for n in xrange(11, 10000):
         up_bound = randint(1,n)
         alist = [(randint(0,up_bound),randint(0,up_bound)) for _ in xrange(n)]
         x,y = zip(*sorted(alist, key =lambda i: i[0]))
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         #print "sorted list: {}\n".format(alist)
         start = time.time()
         #run("split_conquer(alist)")
-        #print split_conquer(alist)
+        split_conquer(alist)
         end=time.time()-start
         #print "finished in {}\n".format(end)
         tmp.append((len(alist), end))
