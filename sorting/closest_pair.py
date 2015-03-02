@@ -54,6 +54,7 @@ def split_conquer(alist):
         return min_d, pair
     else:
         #print "Splitting {}\n".format(alist)
+        #Every Recursive Call IS LOG(N)
         left_list = alist[:mid]
         left_min_d, left_pair = split_conquer(left_list)
         right_list = alist[mid:]
@@ -76,11 +77,12 @@ def split_conquer(alist):
         #Now we find xbase_delta i.e. for mid +/- xbase_delta
         xbase_delta = (delta_pair[1][0] - delta_pair[0][0])
         
-        #Now for filter all the points within (mid +/- xbase_delta) by x
-        #Using Brute Force, find the min of all those filtered points and previous min
+        #Filter all the points within (mid +/- xbase_delta) by x
+        #Using Brute Force, find the min of all those filtered points 
+        #and previous min
         #print "Points being filtered {}\n".format(alist)
         #print "mid - delta {} mid + delta {}\n".format(alist[mid][0] - xbase_delta, alist[mid][0] + xbase_delta)
-        
+        #runs in Order k <= N -time - On every recursive call it IS O(k) -list size
         filtered_pts = filter(lambda points: \
         (alist[mid][0] - xbase_delta <= points[0] <= alist[mid][0])\
         or (alist[mid][0] <= points[0] <= alist[mid][0] + xbase_delta), alist)

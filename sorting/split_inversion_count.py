@@ -27,8 +27,9 @@ def cmp_sort(l1, l2, alist, index, split_conv):
             alist[index] = larger[j]
             j += 1
             index += 1
-            split_conv[0] += 1
+            split_conv[0] += imax - i
         else:
+            #smaller[i] <= larger[j]:
             alist[index] = smaller[i]
             i += 1
             index += 1
@@ -49,16 +50,16 @@ def cmp_sort(l1, l2, alist, index, split_conv):
     #print "list: {}".format(alist)
     return alist
 
-def merge_sort_rec(alist, split_conv = [0], index = 0):
+def split_inv_merge_sort(alist, split_conv = [0], index = 0):
     ln = len(alist)
     mid = ln//2
     #print "index is {}".format(index)
     #break down until base case of len =1 remains
     if mid >= 1:
         #print "Splitting...{}\n".format(alist)
-        left = merge_sort_rec(alist[:mid], split_conv=split_conv)
+        left = split_inv_merge_sort(alist[:mid], split_conv=split_conv)
         left = left[0] if isinstance(left[0], list) else left
-        right = merge_sort_rec(alist[mid:], split_conv=split_conv)
+        right = split_inv_merge_sort(alist[mid:], split_conv=split_conv)
         right = right[0] if isinstance(right[0], list) else right
         #print "left {}\n".format(left)
         #print "right {}\n".format(right)
