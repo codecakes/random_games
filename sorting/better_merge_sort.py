@@ -9,6 +9,12 @@ either Sliced list or Original List.
 3. Until sliced lists are merged recursively back to Parent List.
 
 Turn on the comments to see what's happening.
+
+Order for sanity check is based on Master Method:
+    T(n) <= aT(n/b) + O(n^d)
+    Tn = O(n^dlogn) | a = b^d
+    Tn = O(n^d) | a<b^d
+    Tn = O(n^logd, base=b) | a > b^d
 """
 
 def cmp_sort(l1, l2, alist, index):
