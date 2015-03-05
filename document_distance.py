@@ -35,10 +35,11 @@ from collections import Counter
 from math import acos
 from numpy.linalg.linalg import norm
 
-split_words = lambda f: reduce(operator.add,map(lambda x: x.strip('*-\n').split(),
-f.readlines()))
+split_words = lambda f: reduce(operator.add,map(\
+lambda x: x.strip('*-\n').split(), f.readlines()))
 
-regex_words = lambda rd: reduce(operator.add, map(lambda x:re.findall(r"[a-zA-Z]+", x), rd))
+regex_words = lambda rd: reduce(operator.add, map(\
+lambda x:re.findall(r"[a-zA-Z]+", x), rd))
 
 
 def calc_doc_dist(l1,l2):
