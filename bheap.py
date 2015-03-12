@@ -52,8 +52,8 @@ def is_leaf(node_index, alist):
     return not (lchild < ln or rchild < ln)
 
 def cmp_swap_min(alist, parent_index, lchild, rchild, size, ln):
-    if not (parent_index <= size):
-        return
+    #if not (parent_index <= size):
+    #    return
     greater = smaller = 0
     #print "At parent index {} Comparing parent node {}".format(parent_index, parent_node)
     #chk size overflow
@@ -76,8 +76,8 @@ def cmp_swap_min(alist, parent_index, lchild, rchild, size, ln):
         """
 
 def cmp_swap_max(alist, parent_index, lchild, rchild, size, ln):
-    if not (parent_index <= size):
-        return
+    #if not (parent_index <= size):
+    #    return
     parent_node = alist[parent_index]
     #print "At parent index {} Comparing parent node {}".format(parent_index, parent_node)
     #chk size overflow
@@ -155,7 +155,18 @@ def heap_remove_root(alist, cmp_swap):
     #print
     return build_heap(alist, cmp_swap = cmp_swap)
 
+def heap_sort(alist, cmp_swap):
+    """feed in a deque and sort in a new list"""
+    l = []
+    while len(alist):
+        #heapify initially
+        alist = build_heap(alist, cmp_swap=cmp_swap)
+        l.append(alist.popleft())
+    return l
+
+
 if __name__ == "__main__":
+    """
     from copy import deepcopy
     import heapq
     alist = deque([21, 44, 37, 38, 24, 2, 10, 44])
@@ -200,4 +211,29 @@ if __name__ == "__main__":
     heapq.heapify(blist)
     
     print alist
-    print blist
+    print blist"""
+
+    import time
+    from heapq import heapify, heappush, heappop
+    from math import log
+    from numpy.random import randint
+        
+    def heapsort(iterable):
+        h = []
+        for value in iterable:
+            heappush(h, value)
+        return [heappop(h) for i in range(len(h))]
+    
+
+    
+    tmp = []
+    for i in xrange(2,1002):
+        l = deque(randint(0,i, i))
+        ln = len(l)
+        start = time.time()
+        heap_sort(l, cmp_swap_max)
+        end = time.time() - start
+        start1 = time.time()
+        heapsort(list(l))
+        end1 = time.time() - start1
+        tmp.append((ln, end, end1, ln*log(ln,2)))
