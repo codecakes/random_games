@@ -15,13 +15,17 @@ You can:
 class bnode(object):
     """Node level operations"""
     
-    def __init__(self, root_node, left_node = None, right_node = None, parent_node = None):
+    def __init__(self, root_node, value=None, left_node = None, right_node = None, parent_node = None):
         self.height = 0  #height of this node in a tree
         self.root_node = root_node
+        self.val = value
         #add left and right nodes as bnode class
         self.add_left(left_node)
         self.add_right(right_node)
         self.add_parent(parent_node)
+    
+    def set_node_val(self, value):
+        self.val = value    
     
     def add_left(self, left_node):
         if isinstance(left_node, bnode) and left_node.root_node <= self.root_node:
@@ -108,14 +112,23 @@ class bnode(object):
 
 
 class btree(object):
-    """A Binary Search Tree Implementation"""
+    """A Binary Search Tree Implementation.
+    It can:
+        - Insert a value
+        - Search for a value
+        - Delete a subtree/node.
+        - Minor misc. utilities.
+        
+    """
     
     def __init__(self, root_node):
         self.size = 0
         self.treeheight = 0
+        self.min_key = None
         self.root_node = None
         self.insert(root_node)
     
+    # All about setting a Node in the tree
     def insert(self, new_node):
         """Insert a root node if tree is emtpy else a new node under it"""
         if isinstance(new_node, bnode):
@@ -127,10 +140,62 @@ class btree(object):
         else:
             raise Exception("Not a bnode class")
     
+    def __setattr__(self, node_key, node_val):
+        """Given a node key and its value, Inserts a new node instance
+        in the Btree. 
+        node_key: A numeric value.
+        node_val: The value of that key, a string."""
+        self.insert(bnode(node_key, value=node_val))    
+    #
+    
+    # All about searching for a Node
+    @classmethod
+    def get_node(cls, bnode_instance, node_key):
+        """ A recursive search for node_key. Returns the Node instance
+        if present else None. Can be called directly. 
+        node_key: A numeric value."""
+        
+        if node_key == bnode_instance.root_node:
+            return bnode_instance
+        elif node_key < bnode_instance.root_node:
+            return cls.get_node(bnode_instance.left_node, node_key) if bnode_instance.hasLeftChild() else None
+        elif node_key > bnode_instance.root_node:
+            return cls.get_node(bnode_instance.right_node, node_key) if bnode_instance.hasRightChild() else None
+    
+    def __getattr__(self, node_key):
+        """Gets the Node being searched. Always starts the search from
+        root node.
+        Search like: btree1[5] returns node instance if present else None.
+        node_key: A numeric value."""
+        return self.get_node(self.root_node, node_key)
+    
+    def __contains__(self, node_key):
+        """Returns True if the specified key exists in the Tree ele
+        False. 
+        This way keys can be searched like:
+            5 in btree1.
+        node_key: A numeric value."""
+        return True if self[node_key] != None else False
+    
+    def find_min_key(self):
+        root_node = self.root_node
+        min_key = root_node.root_node
+           
+        while root_node.hasLeftChild():
+            root_node = root_node.left_node
+            if min_key > root_node.root_node:
+                mon_key = root_node.root_node
+        self.min_key = min_key
+        del min_key
+        return self.min_key
+    # 
+    
+    # All About Getting the Max Tree Height of the Tree and Settign it
+    # 
     def getMaxTreeHeight(self):
         """calculate the maximum height of tree starting from tree root"""
         self.treeheight = self.root_node.getMaxHeight()
-        return
+        return self.treeheight
     
     @classmethod
     def imprint_height(cls, bnode_instance, tree_height):
@@ -141,7 +206,7 @@ class btree(object):
         the same each time;
         
         This function is called from btree and is recursive.
-        should be staticmethod.
+        should be classmethod.
         
         Given a bnode class instance and the maximum tree height:
             (tree height = self.treeheight)
@@ -159,3 +224,10 @@ class btree(object):
                 cls.imprint_height(bnode_instance.right_node, tree_height)
         setattr(bnode_instance, 'maxtreeheight', tree_height)
         return
+    
+    
+    def setMaxTreeHeight(self):
+        """ Sets the maximum height attribute in each node in the tree
+        so each node knows the current maximum height."""
+        self.imprint_height(self.root_node, self.getMaxTreeHeight())
+    #
