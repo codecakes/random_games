@@ -44,7 +44,7 @@ class bnode(object):
         """
         if isinstance(parent_node, bnode):
             self.parent_node = parent_node
-            self.height = self.height + self.parent_node.height + 1
+            self.height = self.parent_node.height + 1
     
     def hasRightChild(self):
         """Whether this node has a right child node"""
@@ -121,31 +121,29 @@ class btree(object):
         
     """
     
-    def __init__(self, root_node):
+    def __init__(self, root_node, node_val=None):
+        """root_node is a numeric value"""
         self.size = 0
         self.treeheight = 0
         self.min_key = None
-        self.root_node = None
-        self.insert(root_node)
+        self.insert(root_node, node_val)
+        self.setMaxTreeHeight()
+        self.find_min_key()
+        
     
     # All about setting a Node in the tree
-    def insert(self, new_node):
+    def insert(self, node_key, node_val=None):
         """Insert a root node if tree is emtpy else a new node under it"""
-        if isinstance(new_node, bnode):
-            if self.root_node:
+        
+        if isinstance(node_key, (int, float, long)):
+            new_node = bnode(node_key, value=node_val)    
+            if hasattr(self, 'root_node'):
                 self.root_node.add_child_node(new_node)
             else:
                 self.root_node = new_node
             self.size += 1
         else:
             raise Exception("Not a bnode class")
-    
-    def __setattr__(self, node_key, node_val):
-        """Given a node key and its value, Inserts a new node instance
-        in the Btree. 
-        node_key: A numeric value.
-        node_val: The value of that key, a string."""
-        self.insert(bnode(node_key, value=node_val))    
     #
     
     # All about searching for a Node
@@ -162,20 +160,13 @@ class btree(object):
         elif node_key > bnode_instance.root_node:
             return cls.get_node(bnode_instance.right_node, node_key) if bnode_instance.hasRightChild() else None
     
-    def __getattr__(self, node_key):
-        """Gets the Node being searched. Always starts the search from
-        root node.
-        Search like: btree1[5] returns node instance if present else None.
-        node_key: A numeric value."""
-        return self.get_node(self.root_node, node_key)
-    
     def __contains__(self, node_key):
         """Returns True if the specified key exists in the Tree ele
         False. 
         This way keys can be searched like:
             5 in btree1.
         node_key: A numeric value."""
-        return True if self[node_key] != None else False
+        return True if self.get_node(self.root_node, node_key) != None else False
     
     def find_min_key(self):
         root_node = self.root_node
@@ -184,7 +175,7 @@ class btree(object):
         while root_node.hasLeftChild():
             root_node = root_node.left_node
             if min_key > root_node.root_node:
-                mon_key = root_node.root_node
+                min_key = root_node.root_node
         self.min_key = min_key
         del min_key
         return self.min_key
