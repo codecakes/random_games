@@ -46,6 +46,10 @@ class bnode(object):
             self.parent_node = parent_node
             self.height = self.parent_node.height + 1
     
+    def hasParent(self):
+        """Whether this node has a parent node"""
+        return True if hasattr(self, 'parent_node') else False
+    
     def hasRightChild(self):
         """Whether this node has a right child node"""
         return True if hasattr(self, 'right_node') else False
@@ -53,6 +57,10 @@ class bnode(object):
     def hasLeftChild(self):
         """Whether this node has a left child node"""
         return True if hasattr(self, 'left_node') else False
+    
+    def isParent(self, node):
+        """Whether this node is a parent node to a given bnode object, node"""
+        return node.parent_node == self if node.hasParent() else False
     
     def isRightChild(self):
         """Whether this node is a right child node to a parent"""
@@ -87,6 +95,21 @@ class bnode(object):
                 self.add_right(node)
         return        
     
+    def remove(self, node):
+        """
+        Removes the node from the Calling Parent Node.
+        And Removes the caller Parent from the node itself.
+        """
+        if self.hasLeftChild():
+            if node == self.left_node:
+                del self.left_node
+        elif self.hasRightChild():
+            if node == self.right_node:
+                del self.right_node
+        if node.hasParent():
+            if node.parent_node == self:
+                del node.parent_node
+    
     def getMaxHeight(self):
         """get maximum height/depth till leaf nodes treating current node as root"""
         left = right = 0
@@ -114,9 +137,9 @@ class bnode(object):
 class btree(object):
     """A Binary Search Tree Implementation.
     It can:
-        - Insert a value
-        - Search for a value
-        - Delete a subtree/node.
+        - Insert a node
+        - Search for a node
+        - Delete a node.
         - Minor misc. utilities.
         
     """
@@ -125,10 +148,9 @@ class btree(object):
         """root_node is a numeric value"""
         self.size = 0
         self.treeheight = 0
-        self.min_key = None
+        #root_node is node_key
         self.insert(root_node, node_val)
         self.setMaxTreeHeight()
-        self.find_min_key()
         
     
     # All about setting a Node in the tree
@@ -168,18 +190,63 @@ class btree(object):
         node_key: A numeric value."""
         return True if self.get_node(self.root_node, node_key) != None else False
     
-    def find_min_key(self):
-        root_node = self.root_node
+    def find_min_key(self, start_node):
+        root_node = start_node
         min_key = root_node.root_node
+        min_node = root_node
            
         while root_node.hasLeftChild():
             root_node = root_node.left_node
             if min_key > root_node.root_node:
                 min_key = root_node.root_node
-        self.min_key = min_key
+                min_node = root_node
         del min_key
-        return self.min_key
+        return min_node
     # 
+    
+    # All About Deleting a Node and rebalancing the Tree
+    def delete(self, node_key):
+        if node_key in self:
+            #get that node
+            node_obj = self.get_node(self.root_node, node_key)
+            #find its parent if not root
+            parent_node = node_obj.parent_node if node_obj.hasParent() else None
+                    
+            if node_obj.hasLeftChild() and node_obj.hasRightChild():
+                #check if subtree children are 2 or 1
+                #if 2 subtree
+                #find the minimum of the right subtree-min_right_subtree_node
+                new_node = self.find_min_key(node_obj.right_node)
+                #and remove the minimum node of the right subtree
+                min_right_parent = new_node.parent_node
+                #REMOVE Child
+                min_right_parent.remove(new_node)
+                #redirect node_objects children to new node
+                if node_obj.hasLeftChild():
+                    new_node.add_child_node(node_obj.left_node)
+                if node_obj.hasRightChild():
+                    new_node.add_child_node(node_obj.right_node)
+            elif node_obj.isLeaf():
+                parent_node.remove(node_obj)
+                del node_obj
+                return
+            else:
+                #if one child subtree, point it to the parent's parent
+                #and point parent's parent to this subtree root
+                new_node = node_obj.left_node if node_obj.hasLeftChild() \
+                else node_obj.right_node
+            #Connect to the upper nodes
+            if parent_node:
+                #REMOVE Child
+                parent_node.remove(node_obj)
+                #and swap the current nodes value with its values and key
+                parent_node.add_child_node(new_node)
+            else:
+                self.root_node = new_node
+            del node_obj
+        else:
+            raise Exception("No such node present")
+    #
     
     # All About Getting the Max Tree Height of the Tree and Settign it
     # 
