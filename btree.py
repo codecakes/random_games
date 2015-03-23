@@ -16,8 +16,14 @@ class bnode(object):
     """Node level operations"""
     
     def __init__(self, root_node, value=None, left_node = None, right_node = None, parent_node = None):
+        
         self.height = 0  #height of this node in a tree
-        self.root_node = root_node
+        self.reverse_height = 0  #height from leaf to current node
+        
+        if isinstance(root_node ,(int, float, long)):
+            self.root_node = root_node
+        else:
+            raise Exception("root node type is not a numeric. it can only be a numeric")
         self.val = value
         #add left and right nodes as bnode class
         self.add_left(left_node)
@@ -109,6 +115,8 @@ class bnode(object):
         if node.hasParent():
             if node.parent_node == self:
                 del node.parent_node
+            #delete all instance attributes of node object
+            map(node.__delattr__, node.__dict__)
     
     def getMaxHeight(self):
         """get maximum height/depth till leaf nodes treating current node as root"""
@@ -122,6 +130,20 @@ class bnode(object):
             return max(left, right)
         else:
             return self.height
+    
+    def revHeight(self):
+        """get the maximum height of from bottom leaf to the given current node"""
+        left = right = 0
+        if not self.isLeaf():
+            if self.hasLeftChild():
+                left = self.left_node.revHeight() + 1
+            if self.hasRightChild():
+                right = self.right_node.revHeight() + 1
+            self.reverse_height = max(left, right)
+        else:
+            self.reverse_height = 0
+        del left, right
+        return self.reverse_height
             
     
     def __str__(self):
@@ -151,6 +173,8 @@ class btree(object):
         #root_node is node_key
         self.insert(root_node, node_val)
         self.setMaxTreeHeight()
+        self.min_node = None
+        self.max_node = None
         
     
     # All about setting a Node in the tree
@@ -163,7 +187,11 @@ class btree(object):
                 self.root_node.add_child_node(new_node)
             else:
                 self.root_node = new_node
+            
             self.size += 1
+            self.setMaxTreeHeight()
+            self.min_node = self.find_min_key(self.root_node)
+            self.max_node = self.find_max_key(self.root_node)
         else:
             raise Exception("Not a bnode class")
     #
@@ -202,50 +230,72 @@ class btree(object):
                 min_node = root_node
         del min_key
         return min_node
+    
+    def find_max_key(self, start_node):
+        root_node = start_node
+        max_key = root_node.root_node
+        max_node = root_node
+           
+        while root_node.hasRightChild():
+            root_node = root_node.right_node
+            if max_key < root_node.root_node:
+                max_key = root_node.root_node
+                max_node = root_node
+        del max_key
+        return max_node
     # 
     
     # All About Deleting a Node and rebalancing the Tree
     def delete(self, node_key):
-        if node_key in self:
-            #get that node
-            node_obj = self.get_node(self.root_node, node_key)
-            #find its parent if not root
-            parent_node = node_obj.parent_node if node_obj.hasParent() else None
-                    
-            if node_obj.hasLeftChild() and node_obj.hasRightChild():
-                #check if subtree children are 2 or 1
-                #if 2 subtree
-                #find the minimum of the right subtree-min_right_subtree_node
-                new_node = self.find_min_key(node_obj.right_node)
-                #and remove the minimum node of the right subtree
-                min_right_parent = new_node.parent_node
-                #REMOVE Child
-                min_right_parent.remove(new_node)
-                #redirect node_objects children to new node
-                if node_obj.hasLeftChild():
-                    new_node.add_child_node(node_obj.left_node)
-                if node_obj.hasRightChild():
-                    new_node.add_child_node(node_obj.right_node)
-            elif node_obj.isLeaf():
-                parent_node.remove(node_obj)
+        
+        def _remove(node_key):
+            if node_key in self:
+                #get that node
+                node_obj = self.get_node(self.root_node, node_key)
+                #find its parent if not root
+                parent_node = node_obj.parent_node if node_obj.hasParent() else None
+                        
+                if node_obj.hasLeftChild() and node_obj.hasRightChild():
+                    #check if subtree children are 2 or 1
+                    #if 2 subtree
+                    #find the minimum of the right subtree-min_right_subtree_node
+                    new_node = self.find_min_key(node_obj.right_node)
+                    #and remove the minimum node of the right subtree
+                    min_right_parent = new_node.parent_node
+                    #REMOVE Child
+                    min_right_parent.remove(new_node)
+                    #redirect node_objects children to new node
+                    if node_obj.hasLeftChild():
+                        new_node.add_child_node(node_obj.left_node)
+                    if node_obj.hasRightChild():
+                        new_node.add_child_node(node_obj.right_node)
+                elif node_obj.isLeaf():
+                    parent_node.remove(node_obj)
+                    del node_obj
+                    return
+                else:
+                    #if one child subtree, point it to the parent's parent
+                    #and point parent's parent to this subtree root
+                    new_node = node_obj.left_node if node_obj.hasLeftChild() \
+                    else node_obj.right_node
+                #Connect to the upper nodes
+                if parent_node:
+                    #REMOVE Child
+                    parent_node.remove(node_obj)
+                    #and swap the current nodes value with its values and key
+                    parent_node.add_child_node(new_node)
+                else:
+                    self.root_node = new_node
                 del node_obj
-                return
             else:
-                #if one child subtree, point it to the parent's parent
-                #and point parent's parent to this subtree root
-                new_node = node_obj.left_node if node_obj.hasLeftChild() \
-                else node_obj.right_node
-            #Connect to the upper nodes
-            if parent_node:
-                #REMOVE Child
-                parent_node.remove(node_obj)
-                #and swap the current nodes value with its values and key
-                parent_node.add_child_node(new_node)
-            else:
-                self.root_node = new_node
-            del node_obj
-        else:
-            raise Exception("No such node present")
+                raise Exception("No such node present")
+        
+        _remove(node_key)
+        self.setMaxTreeHeight()
+        self.min_node = self.find_min_key(self.root_node)
+        self.max_node = self.find_max_key(self.root_node)
+        self.size -= 1
+        return
     #
     
     # All About Getting the Max Tree Height of the Tree and Settign it
@@ -289,3 +339,33 @@ class btree(object):
         so each node knows the current maximum height."""
         self.imprint_height(self.root_node, self.getMaxTreeHeight())
     #
+
+
+class AvlTree(btree):
+    
+    def __init__(self, root_node, node_val=None):
+        super(type(self), self).__init__(root_node, node_val=node_val)
+        self.rev_height = 0
+    
+    def getReverseHeight(self):
+        self.rev_height = self.root_node.revHeight()
+        return self.rev_height
+    
+    @classmethod
+    def imprintReverseHeight(cls, bnode_instance, tree_rev_height):
+        
+        if not bnode_instance.isLeaf():
+            if bnode_instance.hasLeftChild():
+                cls.imprint_height(bnode_instance.left_node, tree_rev_height)
+            if bnode_instance.hasRightChild():
+                cls.imprint_height(bnode_instance.right_node, tree_rev_height)
+        setattr(bnode_instance, 'max_rev_height', tree_rev_height)
+        return
+    
+    def setMaxRevHeight(self):
+        self.imprintReverseHeight(self.root_node, self.getReverseHeight())
+    
+    def avldelete(self, node_key):
+        self.delete(node_key)
+        self.setMaxRevHeight()
+        
