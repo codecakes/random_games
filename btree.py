@@ -34,11 +34,13 @@ class bnode(object):
         self.val = value    
     
     def add_left(self, left_node):
+        """Add to left node and point left child to the current calling node"""
         if isinstance(left_node, bnode) and left_node.root_node <= self.root_node:
             self.left_node = left_node
             self.left_node.add_parent(self)
     
     def add_right(self, right_node):
+        """Add to right node and point right child to the current calling node"""
         if isinstance(right_node, bnode) and right_node.root_node > self.root_node:
             self.right_node = right_node
             self.right_node.add_parent(self)
@@ -84,21 +86,24 @@ class bnode(object):
         return not (self.hasLeftChild() or self.hasRightChild())
     
     def add_child_node(self, node):
-        """Add a child node to left or right child position whichever is legit"""
-        if node.root_node <= self.root_node:
+        """Add a child node to left or right child position whichever is legit."""
+        if node.root_node < self.root_node:
             if self.hasLeftChild():
                 #if left child node already exists
                 self.left_node.add_child_node(node)
             else:
                 #add to left node
                 self.add_left(node)
-        else:
+        elif node.root_node > self.root_node:
             if self.hasRightChild():
                 #if right child node already exists
                 self.right_node.add_child_node(node)
             else:
                 #add to right node
                 self.add_right(node)
+        else:
+            #Raise exception for duplicate keys
+            raise Exception("Node with this key already exists")
         return        
     
     def remove(self, node):
@@ -219,6 +224,7 @@ class btree(object):
         return True if self.get_node(self.root_node, node_key) != None else False
     
     def find_min_key(self, start_node):
+        """Find minimum key value from given node and below"""
         root_node = start_node
         min_key = root_node.root_node
         min_node = root_node
@@ -232,6 +238,7 @@ class btree(object):
         return min_node
     
     def find_max_key(self, start_node):
+        """Find maximum key value from given node and below"""
         root_node = start_node
         max_key = root_node.root_node
         max_node = root_node
@@ -247,7 +254,7 @@ class btree(object):
     
     # All About Deleting a Node and rebalancing the Tree
     def delete(self, node_key):
-        
+        """Deletes a node from the key and adjusts the bst property"""
         def _remove(node_key):
             if node_key in self:
                 #get that node
@@ -342,18 +349,20 @@ class btree(object):
 
 
 class AvlTree(btree):
-    
+    """An AVL Tree"""
     def __init__(self, root_node, node_val=None):
+        """initialize the AVL tree using BST property"""
         super(type(self), self).__init__(root_node, node_val=node_val)
         self.rev_height = 0
     
     def getReverseHeight(self):
+        """gets the reverse tree height from leaf to root node"""
         self.rev_height = self.root_node.revHeight()
         return self.rev_height
     
     @classmethod
     def imprintReverseHeight(cls, bnode_instance, tree_rev_height):
-        
+        """imprints the given reverse tree height on each node"""
         if not bnode_instance.isLeaf():
             if bnode_instance.hasLeftChild():
                 cls.imprint_height(bnode_instance.left_node, tree_rev_height)
@@ -363,9 +372,33 @@ class AvlTree(btree):
         return
     
     def setMaxRevHeight(self):
+        """sets universal maximum height from leaf to root per node"""
         self.imprintReverseHeight(self.root_node, self.getReverseHeight())
     
-    def avldelete(self, node_key):
+    def AvlDelete(self, node_key):
+        """
+        Performs balanced deletion.
+        node_key: A key to insert. A numeric type.
+        
+        Deletes a key like typical bst operation.
+        checks for invariance on structure.
+        performs subtree balancing where left-right tree height 
+        differs by more than 1.
+        """
         self.delete(node_key)
         self.setMaxRevHeight()
+        #insert balancing operation here
+    
+    def AvlInsert(self, node_key, node_val=None):
+        """Performs balanced Insertion.
+        node_key: A key to insert. A numeric type.
+        node_val: The value of the key. A string type.
         
+        Inserts the key.
+        checks for invariance on structure.
+        performs subtree balancing where left-right tree height 
+        differs by more than 1.
+        """
+        self.insert(node_key, node_val=node_val)
+        self.setMaxRevHeight()
+        #insert balancing operation here
