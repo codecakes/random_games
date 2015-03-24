@@ -87,24 +87,27 @@ class bnode(object):
     
     def add_child_node(self, node):
         """Add a child node to left or right child position whichever is legit."""
-        if node.root_node < self.root_node:
-            if self.hasLeftChild():
-                #if left child node already exists
-                self.left_node.add_child_node(node)
+        
+        if isinstance(node, bnode):
+            if node.root_node < self.root_node:
+                if self.hasLeftChild():
+                    #if left child node already exists
+                    self.left_node.add_child_node(node)
+                else:
+                    #add to left node
+                    self.add_left(node)
+            elif node.root_node > self.root_node:
+                if self.hasRightChild():
+                    #if right child node already exists
+                    self.right_node.add_child_node(node)
+                else:
+                    #add to right node
+                    self.add_right(node)
             else:
-                #add to left node
-                self.add_left(node)
-        elif node.root_node > self.root_node:
-            if self.hasRightChild():
-                #if right child node already exists
-                self.right_node.add_child_node(node)
-            else:
-                #add to right node
-                self.add_right(node)
-        else:
-            #Raise exception for duplicate keys
-            raise Exception("Node with this key already exists")
-        return        
+                #Raise exception for duplicate keys
+                raise Exception("Node with this key already exists")
+            self.revHeight()
+            return
     
     def remove(self, node):
         """
@@ -120,8 +123,21 @@ class bnode(object):
         if node.hasParent():
             if node.parent_node == self:
                 del node.parent_node
-            #delete all instance attributes of node object
-            map(node.__delattr__, node.__dict__)
+    
+    def refreshHeight(self):
+        """eval and get maximum height from current node to bottom leaf"""
+        if not self.hasParent():
+            self.height = 0
+            if self.hasLeftChild():
+                self.left_node.refreshHeight()
+            if self.hasRightChild():
+                self.right_node.refreshHeight()
+        else:
+            self.height = self.parent_node.height + 1
+            if self.hasLeftChild():
+                self.left_node.refreshHeight()
+            if self.hasRightChild():
+                self.right_node.refreshHeight()
     
     def getMaxHeight(self):
         """get maximum height/depth till leaf nodes treating current node as root"""
@@ -137,7 +153,7 @@ class bnode(object):
             return self.height
     
     def revHeight(self):
-        """get the maximum height of from bottom leaf to the given current node"""
+        """eval and get maximum height from bottom leaf to current node"""
         left = right = 0
         if not self.isLeaf():
             if self.hasLeftChild():
@@ -149,6 +165,17 @@ class bnode(object):
             self.reverse_height = 0
         del left, right
         return self.reverse_height
+    
+    def revHeightDiff(self):
+        """difference in reverse Height between child nodes"""
+        #update reverse height throughout all children nodes and current node
+        self.revHeight()
+        
+        if self.hasLeftChild() and self.hasRightChild():
+            return abs(self.left_node.reverse_height - self.right_node.reverse_height)
+        else:
+            return self.reverse_height
+        
             
     
     def __str__(self):
@@ -194,7 +221,7 @@ class btree(object):
                 self.root_node = new_node
             
             self.size += 1
-            self.setMaxTreeHeight()
+            #self.setMaxTreeHeight()
             self.min_node = self.find_min_key(self.root_node)
             self.max_node = self.find_max_key(self.root_node)
         else:
@@ -277,28 +304,27 @@ class btree(object):
                     if node_obj.hasRightChild():
                         new_node.add_child_node(node_obj.right_node)
                 elif node_obj.isLeaf():
-                    parent_node.remove(node_obj)
-                    del node_obj
-                    return
+                    new_node = None
                 else:
                     #if one child subtree, point it to the parent's parent
                     #and point parent's parent to this subtree root
                     new_node = node_obj.left_node if node_obj.hasLeftChild() \
                     else node_obj.right_node
+                
                 #Connect to the upper nodes
                 if parent_node:
                     #REMOVE Child
                     parent_node.remove(node_obj)
                     #and swap the current nodes value with its values and key
                     parent_node.add_child_node(new_node)
-                else:
+                elif new_node:
                     self.root_node = new_node
                 del node_obj
             else:
                 raise Exception("No such node present")
         
         _remove(node_key)
-        self.setMaxTreeHeight()
+        #self.setMaxTreeHeight()
         self.min_node = self.find_min_key(self.root_node)
         self.max_node = self.find_max_key(self.root_node)
         self.size -= 1
@@ -309,6 +335,7 @@ class btree(object):
     # 
     def getMaxTreeHeight(self):
         """calculate the maximum height of tree starting from tree root"""
+        self.root_node.refreshHeight()  #refresh height from root to leaves
         self.treeheight = self.root_node.getMaxHeight()
         return self.treeheight
     
@@ -375,6 +402,141 @@ class AvlTree(btree):
         """sets universal maximum height from leaf to root per node"""
         self.imprintReverseHeight(self.root_node, self.getReverseHeight())
     
+    ## Rotation operation
+    def left_rotate(self, node):
+        """
+        Left Rotation of node:
+        -------------------------
+        Remove node' parent association if any.
+        Remove node' right child 
+        Remove parent association with right child
+        Set right child's left child as new right child of node.
+        Remove associate between right child and its left child.
+        Set right child as root and node as left child of root.
+        Relink root node' parent associate if any.
+        return root node as new node
+        """
+        #Remove node' parent association if any.
+        if node.hasParent():
+            parent = node.parent_node
+            parent.remove(node)
+        else:
+            parent = None
+        
+        #Remove node' right child
+        right_child = node.right_node
+        node.remove(right_child)
+        
+        #Set right child's left child as new right child of node.
+        if right_child.hasLeftChild():
+            right_left = right_child.left_node
+            #Remove associate between right child and its left child.
+            right_child.remove(right_left)
+            node.add_child_node(right_left)
+        
+        #Set right child as root and node as left child of root.
+        right_child.add_child_node(node)
+        
+        #Relink root node' parent associate if any.
+        if parent:
+            parent.add_child_node(right_child)
+        
+        #return root node as new node
+        return right_child
+    
+    def right_rotate(self, node):
+        """
+        Right Rotation of node:
+        -------------------------
+        Remove node' parent association if any.
+        Remove node' left child 
+        Remove parent association with left child
+        Set left child's right child as new left child of node.
+        Remove associate between left child and its right child.
+        Set left child as root and node as right child of root.
+        Relink root node' parent associate if any.
+        return root node as new node
+        """
+        #Remove node' parent association if any.
+        if node.hasParent():
+            parent = node.parent_node
+            parent.remove(node)
+        else:
+            parent = None
+        
+        #Remove node' left child
+        left_child = node.left_node
+        node.remove(left_child)
+        
+        #Set left child's right child as new left child of node.
+        if left_child.hasRightChild():
+            left_right = left_child.right_node
+            #Remove associate between left child and its right child.
+            left_child.remove(left_right)
+            node.add_child_node(left_right)
+        
+        #Set left child as root and node as right child of root.
+        left_child.add_child_node(node)
+        
+        #Relink root node' parent associate if any.
+        if parent:
+            parent.add_child_node(left_child)
+        
+        #return root node as new node
+        return left_child
+    
+    def rotate(self, node):
+        """Rotates current node to adjust AVL property"""
+        if node.hasLeftChild() and node.hasRightChild():
+            if (node.left_node.reverse_height - node.right_node.reverse_height) > 1:
+                return self.right_rotate(node)
+            elif (node.right_node.reverse_height - node.left_node.reverse_height) > 1:
+                return self.left_rotate(node)
+        elif not node.hasLeftChild():
+            return self.left_rotate(node)
+        elif not node.hasRightChild():
+            return self.right_rotate(node)
+    ##
+    
+    ## Balancing operation
+    @classmethod
+    def _rebalance(cls, node):
+        #if leaf node return
+        #rotate
+        #update revHeight
+        #recurse _rebalance to child nodes
+        if not node.isLeaf():
+            if node.revHeightDiff() > 1:
+                node = cls.rotate(node)
+                cls.root_node.revHeight()
+            if node.hasLeftChild():
+                cls._rebalance(node.left_node)
+            if node.hasRightChild():
+                cls._rebalance(node.right_node)
+        return
+    
+    def balance(self):
+        while self.root_node.revHeightDiff() > 1:
+            #while root node unbalanced
+            self.root_node = self.rotate(self.root_node)
+            self.root_node.revHeight()
+            self.root_node.refreshHeight()
+            #go down
+            if self.root_node.hasLeftChild():
+                self._rebalance(self.root_node.left_node)
+            if self.root_node.hasRightChild():
+                self._rebalance(self.root_node.right_node)
+        return
+    ##
+    
+    # post op utility after inserting, deleting, modification
+    def _postop(self):
+        self.balance()
+        self.setMaxTreeHeight()
+        self.setMaxRevHeight()
+    ##
+    
+    #Delete operation
     def AvlDelete(self, node_key):
         """
         Performs balanced deletion.
@@ -386,9 +548,9 @@ class AvlTree(btree):
         differs by more than 1.
         """
         self.delete(node_key)
-        self.setMaxRevHeight()
-        #insert balancing operation here
+        self._postop()
     
+    #Insert operation
     def AvlInsert(self, node_key, node_val=None):
         """Performs balanced Insertion.
         node_key: A key to insert. A numeric type.
@@ -400,5 +562,4 @@ class AvlTree(btree):
         differs by more than 1.
         """
         self.insert(node_key, node_val=node_val)
-        self.setMaxRevHeight()
-        #insert balancing operation here
+        self._postop()
