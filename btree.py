@@ -563,3 +563,11 @@ class AvlTree(btree):
         """
         self.insert(node_key, node_val=node_val)
         self._postop()
+
+#for quick testing purposes
+if __name__ == "__main__":
+    from numpy.random import randint
+    atree = btree(80, 'FlightA')
+    x = map(bnode, [randint(1,1000) for _ in xrange(10)])
+    map(lambda y: atree.insert(y.root_node), x)
+
