@@ -7,9 +7,13 @@ You can:
     
     - Insert nodes
     - Delete nodes
-    - Merge Trees
+    - Merge Trees - merge by using Insert nodes.
     - Rebalance Trees
 """
+
+from math import floor, log
+from operator import add
+from collections import deque
 
 
 class bnode(object):
@@ -29,6 +33,10 @@ class bnode(object):
         self.add_left(left_node)
         self.add_right(right_node)
         self.add_parent(parent_node)
+    
+    def level(self, n):
+        """return level of tree given number of nodes"""
+        return floor(log(n, 2))
     
     def set_node_val(self, value):
         self.val = value    
@@ -86,8 +94,8 @@ class bnode(object):
         return not (self.hasLeftChild() or self.hasRightChild())
     
     def add_child_node(self, node):
-        """Add a child node to left or right child position whichever is legit."""
-        
+        """Add a child node to left or right child position whichever is legit.
+        #recursive approach
         if isinstance(node, bnode):
             if node.root_node < self.root_node:
                 if self.hasLeftChild():
@@ -105,8 +113,35 @@ class bnode(object):
                     self.add_right(node)
             else:
                 #Raise exception for duplicate keys
+                print node.root_node
                 raise Exception("Node with this key already exists")
-            self.revHeight()
+        log(N) operation.
+        """
+        # a non recur solution
+        done = 0
+        target_node = self
+        if isinstance(node, bnode):
+            while not done:
+                if node.root_node < target_node.root_node:
+                    if target_node.hasLeftChild():
+                        #if left child node already exists
+                        target_node = target_node.left_node
+                    else:
+                        #add to left node
+                        target_node.add_left(node)
+                        done = 1
+                elif node.root_node > target_node.root_node:
+                    if target_node.hasRightChild():
+                        #if right child node already exists
+                        target_node = target_node.right_node
+                    else:
+                        #add to right node
+                        target_node.add_right(node)
+                        done = 1
+                elif node.root_node == target_node.root_node:
+                    #Raise exception for duplicate keys
+                    print node.root_node
+                    raise Exception("Node with this key already exists")
             return
     
     def remove(self, node):
@@ -114,46 +149,58 @@ class bnode(object):
         Removes the node from the Calling Parent Node.
         And Removes the caller Parent from the node itself.
         """
-        if self.hasLeftChild():
-            if node == self.left_node:
-                del self.left_node
-        elif self.hasRightChild():
-            if node == self.right_node:
-                del self.right_node
         if node.hasParent():
+            if node.parent_node.hasLeftChild():
+                if node.parent_node.left_node == node:
+                    print "Found self.left_node {} == node {}".format(self.left_node, node)
+                    delattr(self, 'left_node')
+            if node.parent_node.hasRightChild():
+                if node.parent_node.right_node == node:
+                    print "Found self.right_node {} == node {}".format(self.right_node, node)
+                    delattr(self, 'right_node')
             if node.parent_node == self:
                 del node.parent_node
+        
     
     def refreshHeight(self):
         """eval and get maximum height from current node to bottom leaf"""
-        if not self.hasParent():
-            self.height = 0
-            if self.hasLeftChild():
-                self.left_node.refreshHeight()
-            if self.hasRightChild():
-                self.right_node.refreshHeight()
-        else:
-            self.height = self.parent_node.height + 1
-            if self.hasLeftChild():
-                self.left_node.refreshHeight()
-            if self.hasRightChild():
-                self.right_node.refreshHeight()
+        node = self
+        temp = deque([node])
+        
+        while temp:
+            target_node = temp.popleft()
+            if not target_node.hasParent():
+                target_node.height = 0
+            else:
+                target_node.height = target_node.parent_node.height + 1
+            if target_node.hasLeftChild():
+                temp.append(target_node.left_node)
+            if target_node.hasRightChild():
+                temp.append(target_node.right_node)
+        return
     
     def getMaxHeight(self):
         """get maximum height/depth till leaf nodes treating current node as root"""
-        left = right = 0
-        if not self.isLeaf():
-            if self.hasLeftChild():
-                left = self.left_node.getMaxHeight()
-            if self.hasRightChild():
-                right = self.right_node.getMaxHeight()
-            print "left {} right {}".format(left, right)
-            return max(left, right)
-        else:
-            return self.height
+        max_height = 0
+        temp = deque([self])
+        
+        while temp:
+            target_node = temp.popleft()
+            
+            if not target_node.isLeaf():
+                if target_node.hasLeftChild():
+                    temp.append(target_node.left_node)
+                if target_node.hasRightChild():
+                    temp.append(target_node.right_node)
+            if target_node.height > max_height:
+                max_height = target_node.height
+        return max_height
     
     def revHeight(self):
-        """eval and get maximum height from bottom leaf to current node"""
+        """
+        Evaluate and get maximum height from bottom leaf to current node.
+        
+        #recursive way:
         left = right = 0
         if not self.isLeaf():
             if self.hasLeftChild():
@@ -165,9 +212,59 @@ class bnode(object):
             self.reverse_height = 0
         del left, right
         return self.reverse_height
+        """
+        #tot_nodes: Number of nodes as input to calculate levels in the tree.
+        tot_nodes = self.find_tot_nodes()
+        #store operation
+        def store_op(tot_nodes):
+            level = 0
+            max_level = self.level(tot_nodes)  #max levels at given total nodes
+            store_list = deque()
+            store_list.appendleft([self])
+            
+            while level <= max_level and max_level > 0:
+                l = store_list[0]
+                temp = []
+                for node in l:
+                    if not node.isLeaf():
+                        if node.hasLeftChild():
+                            temp.append(node.left_node)
+                        if node.hasRightChild():
+                            temp.append(node.right_node)
+                    else:
+                        node.reverse_height = 0
+                        temp.append(node)
+                store_list.appendleft(temp)
+                level += 1
+            return store_list
+        
+        def evaluate(store_list):
+            """
+            Evaluate reverse height 
+            given a list of nodes leaves to root node L-R.
+            root node is the current calling node
+            and may not necessarily be the actual root of the tree.
+            """
+            #In each list of nodes
+            for each_list in store_list:
+                #for each node in the list
+                for each_node in each_list:
+                    left_height = right_height = 0
+                    #print store_list
+                    #print each_node, type(each_node)
+                    if not each_node.isLeaf():
+                        left_height= each_node.left_node.reverse_height \
+                        if each_node.hasLeftChild() else None
+                        right_height = each_node.right_node.reverse_height \
+                        if each_node.hasRightChild() else None
+                        each_node.reverse_height = max(left_height, right_height) + 1
+        
+        evaluate(store_op(tot_nodes))
+        return self.reverse_height
     
     def revHeightDiff(self):
         """difference in reverse Height between child nodes"""
+        
         #update reverse height throughout all children nodes and current node
         self.revHeight()
         
@@ -175,17 +272,39 @@ class bnode(object):
             return abs(self.left_node.reverse_height - self.right_node.reverse_height)
         else:
             return self.reverse_height
+    
+    def find_tot_nodes(self):
+        """Find total nodes from self and below
+        #recursive but runs out of stack exceeding max rec depth 
+        count = 1
+        if self.hasLeftChild():
+            count += self.left_node.find_tot_nodes()
+        if self.hasRightChild():
+            count += self.right_node.find_tot_nodes()
+        return count
+        """
+        master = []
+        temp = deque([self])
+        while len(temp) != 0:
+            print "inside find_tot_nodes loop length {} with nodes {}".format(len(temp), [i.root_node for i in temp])
+            each_node = temp.popleft()
+            print "each_node is {}".format(each_node.root_node)
+            if each_node.hasLeftChild():
+                temp.append(each_node.left_node)
+            if each_node.hasRightChild():
+                temp.append(each_node.right_node)
+            master.append(each_node)
+        print "Done"
+        return len(master)
+
         
-            
+        
     
     def __str__(self):
         return "Root Node %s with parent %s with left child %s right child %s" %(\
         self.root_node, self.parent_node.root_node if hasattr(self, 'parent_node') else "None",\
         (self.left_node.root_node) if hasattr(self, 'left_node') else "None", \
         (self.right_node.root_node) if hasattr(self, 'right_node') else "None")
-
-
-
 
 
 class btree(object):
@@ -202,30 +321,31 @@ class btree(object):
         """root_node is a numeric value"""
         self.size = 0
         self.treeheight = 0
+        self.min_node = None
+        self.max_node = None
         #root_node is node_key
         self.insert(root_node, node_val)
         self.setMaxTreeHeight()
-        self.min_node = None
-        self.max_node = None
         
     
     # All about setting a Node in the tree
     def insert(self, node_key, node_val=None):
         """Insert a root node if tree is emtpy else a new node under it"""
-        
+        print "inserting..{}".format(node_key)
         if isinstance(node_key, (int, float, long)):
-            new_node = bnode(node_key, value=node_val)    
+            new_node = bnode(node_key, value=node_val)
+            
             if hasattr(self, 'root_node'):
                 self.root_node.add_child_node(new_node)
             else:
                 self.root_node = new_node
             
             self.size += 1
-            #self.setMaxTreeHeight()
             self.min_node = self.find_min_key(self.root_node)
             self.max_node = self.find_max_key(self.root_node)
         else:
             raise Exception("Not a bnode class")
+        print "done inserting.."
     #
     
     # All about searching for a Node
@@ -233,14 +353,29 @@ class btree(object):
     def get_node(cls, bnode_instance, node_key):
         """ A recursive search for node_key. Returns the Node instance
         if present else None. Can be called directly. 
-        node_key: A numeric value."""
+        node_key: A numeric value.
         
+        #a recursive solution
         if node_key == bnode_instance.root_node:
             return bnode_instance
         elif node_key < bnode_instance.root_node:
             return cls.get_node(bnode_instance.left_node, node_key) if bnode_instance.hasLeftChild() else None
         elif node_key > bnode_instance.root_node:
             return cls.get_node(bnode_instance.right_node, node_key) if bnode_instance.hasRightChild() else None
+        """
+        #a non recursive approach
+        while node_key != bnode_instance.root_node:
+            if node_key < bnode_instance.root_node:
+                if bnode_instance.hasLeftChild():
+                    bnode_instance = bnode_instance.left_node
+                else:
+                    return None
+            elif node_key > bnode_instance.root_node:
+                if bnode_instance.hasRightChild():
+                    bnode_instance = bnode_instance.right_node
+                else:
+                    return None
+        return bnode_instance if node_key == bnode_instance.root_node else None
     
     def __contains__(self, node_key):
         """Returns True if the specified key exists in the Tree ele
@@ -324,7 +459,6 @@ class btree(object):
                 raise Exception("No such node present")
         
         _remove(node_key)
-        #self.setMaxTreeHeight()
         self.min_node = self.find_min_key(self.root_node)
         self.max_node = self.find_max_key(self.root_node)
         self.size -= 1
@@ -403,7 +537,8 @@ class AvlTree(btree):
         self.imprintReverseHeight(self.root_node, self.getReverseHeight())
     
     ## Rotation operation
-    def left_rotate(self, node):
+    @classmethod
+    def left_rotate(cls, node):
         """
         Left Rotation of node:
         -------------------------
@@ -444,7 +579,8 @@ class AvlTree(btree):
         #return root node as new node
         return right_child
     
-    def right_rotate(self, node):
+    @classmethod
+    def right_rotate(cls, node):
         """
         Right Rotation of node:
         -------------------------
@@ -485,42 +621,55 @@ class AvlTree(btree):
         #return root node as new node
         return left_child
     
-    def rotate(self, node):
+    @classmethod
+    def rotate(cls, node):
         """Rotates current node to adjust AVL property"""
         if node.hasLeftChild() and node.hasRightChild():
             if (node.left_node.reverse_height - node.right_node.reverse_height) > 1:
-                return self.right_rotate(node)
+                print "right rotation"
+                node = cls.right_rotate(node)
             elif (node.right_node.reverse_height - node.left_node.reverse_height) > 1:
-                return self.left_rotate(node)
+                print "left rotation"
+                node = cls.left_rotate(node)
         elif not node.hasLeftChild():
-            return self.left_rotate(node)
+            print "left rotation"
+            node = cls.left_rotate(node)
         elif not node.hasRightChild():
-            return self.right_rotate(node)
+            print "right rotation"
+            node = cls.right_rotate(node)
+        return node
     ##
     
     ## Balancing operation
     @classmethod
     def _rebalance(cls, node):
         #if leaf node return
-        #rotate
+        #else rotate if height difference
         #update revHeight
         #recurse _rebalance to child nodes
-        if not node.isLeaf():
-            if node.revHeightDiff() > 1:
-                node = cls.rotate(node)
-                cls.root_node.revHeight()
-            if node.hasLeftChild():
-                cls._rebalance(node.left_node)
-            if node.hasRightChild():
-                cls._rebalance(node.right_node)
+        temp = deque([node])
+        while temp:
+            each_node = temp.popleft()
+            if each_node.revHeightDiff() > 1:
+                each_node = cls.rotate(node)
+                #this is a new node. reval reverse height
+                each_node.revHeight()
+            if each_node.hasLeftChild():
+                temp.append(each_node.left_node)
+            if each_node.hasRightChild():
+                temp.append(each_node.right_node)
         return
     
     def balance(self):
+        print "pre condition check"
         while self.root_node.revHeightDiff() > 1:
+            print "post condition check"
             #while root node unbalanced
+            print "rotating"
             self.root_node = self.rotate(self.root_node)
+            print "rotation done"
+            print "calculating rev Height in balance..."
             self.root_node.revHeight()
-            self.root_node.refreshHeight()
             #go down
             if self.root_node.hasLeftChild():
                 self._rebalance(self.root_node.left_node)
@@ -531,7 +680,14 @@ class AvlTree(btree):
     
     # post op utility after inserting, deleting, modification
     def _postop(self):
+        #print "refreshing height post op AVL"
+        #self.root_node.refreshHeight()
+        #print "done"
+        print "calculating post op AVL revHeight.."
+        self.root_node.revHeight()
+        print "done"
         self.balance()
+        self.root_node.refreshHeight()
         self.setMaxTreeHeight()
         self.setMaxRevHeight()
     ##
@@ -548,6 +704,7 @@ class AvlTree(btree):
         differs by more than 1.
         """
         self.delete(node_key)
+        print "entering AVL Insert post op"
         self._postop()
     
     #Insert operation
@@ -561,13 +718,70 @@ class AvlTree(btree):
         performs subtree balancing where left-right tree height 
         differs by more than 1.
         """
+        print "entered AVL inserting"
         self.insert(node_key, node_val=node_val)
+        print "\n entering AVL Insert post op\n"
         self._postop()
+    
+    def AvlInsertBatch(self, batch):
+        """Insert in batch only node_keys without their values"""
+        #[self.AvlInsert(node_key) for node_key in batch]
+        map(self.AvlInsert, batch)
+    
+    def _AvlAddChild(self, node):
+        """
+        Add an alien child node of another tree.
+        Used in AvlMerge.
+        """
+        temp = deque()
+        temp.append(node)
+        while temp:
+            each_node = temp.popleft()
+            if each_node.hasLeftChild():
+                temp.append(each_node.left_node)
+            if each_node.hasRightChild():
+                temp.append(each_node.right_node)
+            self.AvlInsert(each_node.root_node)
+    
+    def AvlMerge(self, another_tree):
+        """Merge Two trees Unique nodes.
+        This will merge the root of another AVL Tree with current Tree 
+        and rebalance. O(nlogn) Operation"""
+        if isinstance(another_tree, AvlTree):
+            alien_root = another_tree.root_node
+            self._AvlAddChild(alien_root)
+
 
 #for quick testing purposes
 if __name__ == "__main__":
     from numpy.random import randint
-    atree = btree(80, 'FlightA')
-    x = map(bnode, [randint(1,1000) for _ in xrange(10)])
-    map(lambda y: atree.insert(y.root_node), x)
+    
+    def gen_unique_num(r):
+        t = []
+        for _ in xrange(r):
+            a = randint(1, 1000000000)
+            if a not in t:
+                t.append(a)
+        return t
+    atree = AvlTree(80, 'FlightA')
+    
+    atree.AvlInsert(257)
+    atree.AvlInsert(932)
+    
+    atree.AvlInsert(225)
+    atree.AvlInsert(275)
+    
+    atree.AvlInsert(991)
+    atree.AvlInsert(274)
 
+    
+    atree.AvlInsert(656)
+    
+    atree.AvlInsert(885)
+    atree.AvlInsert(574)
+    
+    ctree = AvlTree(600)
+    ctree.AvlInsert(564)
+    atree.AvlMerge(ctree)
+    atree.AvlDelete(885)
+    
