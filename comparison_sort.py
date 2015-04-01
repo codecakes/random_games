@@ -1,4 +1,6 @@
 #comparison sort - probablythe cleanest solution I ever wrote!
+#No array checking yet for integer type.
+#Assuming incoming array is strictly an integer array/list
 
 def store(alist):
     """increment counter in a counter array for every integer encountered"""
