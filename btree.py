@@ -80,11 +80,17 @@ class bnode(object):
     
     def isRightChild(self):
         """Whether this node is a right child node to a parent"""
-        return self.parent_node.right_node == self if hasattr(self, 'parent_node') else False
+        if self.hasParent():
+            if self.parent_node.hasRightChild():
+                return self.parent_node.right_node == self
+        return False
     
     def isLeftChild(self):
         """Whether this node is a left child node to a parent"""
-        return self.parent_node.left_node == self if hasattr(self, 'parent_node') else False
+        if self.hasParent():
+            if self.parent_node.hasLeftChild():
+                return self.parent_node.left_node == self
+        return False
     
     def isLeaf(self):
         """
@@ -149,17 +155,13 @@ class bnode(object):
         Removes the node from the Calling Parent Node.
         And Removes the caller Parent from the node itself.
         """
-        if node.hasParent():
-            if node.parent_node.hasLeftChild():
-                if node.parent_node.left_node == node:
-                    print "Found self.left_node {} == node {}".format(self.left_node, node)
-                    delattr(self, 'left_node')
-            if node.parent_node.hasRightChild():
-                if node.parent_node.right_node == node:
-                    print "Found self.right_node {} == node {}".format(self.right_node, node)
-                    delattr(self, 'right_node')
-            if node.parent_node == self:
-                del node.parent_node
+        if node.hasParent() and self.isParent(node):
+            if node.isLeftChild() and node.parent_node.left_node == node:
+                delattr(self, 'left_node')
+            elif node.isRightChild() and node.parent_node.right_node == node:
+                delattr(self, 'right_node')
+            print "DELETING PARENT NODE ASSOCIATION"
+            delattr(node, 'parent_node')
         
     
     def refreshHeight(self):
@@ -283,18 +285,19 @@ class bnode(object):
             count += self.right_node.find_tot_nodes()
         return count
         """
+        print "find_tot_nodes Start"
         master = []
         temp = deque([self])
         while len(temp) != 0:
-            print "inside find_tot_nodes loop length {} with nodes {}".format(len(temp), [i.root_node for i in temp])
+            #print "inside find_tot_nodes loop length {} with nodes {}".format(len(temp), [i.root_node for i in temp])
             each_node = temp.popleft()
-            print "each_node is {}".format(each_node.root_node)
+            #print "each_node is {}".format(each_node.root_node)
             if each_node.hasLeftChild():
                 temp.append(each_node.left_node)
             if each_node.hasRightChild():
                 temp.append(each_node.right_node)
             master.append(each_node)
-        print "Done"
+        print "find_tot_nodes Done"
         return len(master)
 
         
@@ -326,9 +329,8 @@ class btree(object):
         #root_node is node_key
         self.insert(root_node, node_val)
         self.setMaxTreeHeight()
-        
     
-    # All about setting a Node in the tree
+    # All about setting a Node in the tree    
     def insert(self, node_key, node_val=None):
         """Insert a root node if tree is emtpy else a new node under it"""
         print "inserting..{}".format(node_key)
@@ -647,9 +649,14 @@ class AvlTree(btree):
         #else rotate if height difference
         #update revHeight
         #recurse _rebalance to child nodes
+        done = []
         temp = deque([node])
+        print "REBALANCE STARTS"
         while temp:
             each_node = temp.popleft()
+            #print "In REBALANCE with each node {}".format(each_node.root_node)
+            #if each_node.root_node in done:
+                #print "{} REPEATS! ALRDY in done list {}".format(each_node.root_node, done)
             if each_node.revHeightDiff() > 1:
                 each_node = cls.rotate(node)
                 #this is a new node. reval reverse height
@@ -658,9 +665,13 @@ class AvlTree(btree):
                 temp.append(each_node.left_node)
             if each_node.hasRightChild():
                 temp.append(each_node.right_node)
+            done.append(each_node.root_node)
+            #print "temp list {}".format([i.root_node for i in temp])
+        print "REBALANCE ENDS"
         return
     
     def balance(self):
+        print "BALANCE FUNC START"
         print "pre condition check"
         while self.root_node.revHeightDiff() > 1:
             print "post condition check"
@@ -668,15 +679,50 @@ class AvlTree(btree):
             print "rotating"
             self.root_node = self.rotate(self.root_node)
             print "rotation done"
-            print "calculating rev Height in balance..."
+            #print "calculating rev Height in balance..."
             self.root_node.revHeight()
             #go down
             if self.root_node.hasLeftChild():
                 self._rebalance(self.root_node.left_node)
             if self.root_node.hasRightChild():
                 self._rebalance(self.root_node.right_node)
+            print "self.size {}".format(self.size)
+            if self.size < 4:
+                #print "BALANCE FUNC: Breaking for size < 4"
+                break
+        print "BALANCE FUNC END"
         return
     ##
+    
+    def _innerRotate_insertPostOp(self, leaf_node):
+        """Swap pre Rotation. Useful for AvlTree"""
+        if leaf_node.hasParent() and leaf_node.isLeaf():
+            node = leaf_node.parent_node
+            #inner right rotate
+            if leaf_node.isLeftChild() and node.hasParent() \
+            and node.hasLeftChild() and (not node.hasRightChild()) and node.isRightChild():
+                self.right_rotate(node)
+            elif leaf_node.isRightChild() and node.hasParent() \
+            and node.hasRightChild() and (not node.hasLeftChild()) and node.isLeftChild():
+                #inner left rotate
+                self.left_rotate(node)
+    
+    def _optimize_leaf(self):
+        """Find leaves that allow 2 rotation principle"""
+        leaves = []
+        temp = deque([self.root_node])
+        while temp:
+            print "inside _optimize_leaf LOOP"
+            each_node = temp.popleft()
+            if each_node.isLeaf():
+                leaves.append(each_node)
+            if each_node.hasLeftChild():
+                temp.append(each_node.left_node)
+            if each_node.hasRightChild():
+                temp.append(each_node.right_node)
+        print "LEAVES {}".format([i.root_node for i in leaves])
+        for each_leaf in leaves:
+            self._innerRotate_insertPostOp(each_leaf)
     
     # post op utility after inserting, deleting, modification
     def _postop(self):
@@ -685,7 +731,10 @@ class AvlTree(btree):
         #print "done"
         print "calculating post op AVL revHeight.."
         self.root_node.revHeight()
-        print "done"
+        print "postop AVL revHeight Calc done"
+        print "ENTERING optimize Leaf"
+        #self._optimize_leaf()
+        print "ENDED optimize Leaf"
         self.balance()
         self.root_node.refreshHeight()
         self.setMaxTreeHeight()
@@ -763,6 +812,7 @@ if __name__ == "__main__":
             if a not in t:
                 t.append(a)
         return t
+    
     atree = AvlTree(80, 'FlightA')
     
     atree.AvlInsert(257)
@@ -778,10 +828,24 @@ if __name__ == "__main__":
     atree.AvlInsert(656)
     
     atree.AvlInsert(885)
+    
     atree.AvlInsert(574)
+    
+    #atree.AvlInsert(600)
+    #atree.AvlInsert(564)
     
     ctree = AvlTree(600)
     ctree.AvlInsert(564)
     atree.AvlMerge(ctree)
     atree.AvlDelete(885)
     
+    #an eg from MIT class
+    sucker = AvlTree(41)
+    sucker.AvlInsert(20)
+    sucker.AvlInsert(65)
+    sucker.AvlInsertBatch([11, 26, 50, 23, 29, 55])
+    
+    
+    dt = AvlTree(80)
+    dt.AvlInsert(101)
+    dt.AvlInsert(90)
