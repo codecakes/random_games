@@ -18,4 +18,4 @@ def execute(klist):
 
 def cmp_int_sort(alist):
     """Sort an integer array using comparison sort"""
-    return execute(store(alist))
+    return execute(store(alist))  #O(len(klist))
