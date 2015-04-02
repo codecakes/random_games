@@ -44,3 +44,13 @@ def count_int_clr_sort(alist):
     """Sort an integer array using weird counting sort logic"""
     return execute_clr(alist, store(alist))
 
+
+#quick profiling test
+if __name__ == "__main__":
+    from cProfile import run
+    from numpy.random import randint
+    
+    x = randint(0, 30000000, 1000000)
+    
+    run("count_int_clr_sort(x)")
+    run("x.sort()")
