@@ -3,6 +3,10 @@
 #No array checking yet for integer type.
 #Assuming incoming array is strictly an integer array/list
 
+#NOTE: LAST CHECKED - This implementation beats python's out of place sorted()
+# for integer sorting. Perhaps this implementation using radix sort beats 
+# general numeral sorting vs. sorted() in general.
+
 def store(alist):
     """increment counter in a counter array for every integer encountered"""
     klist = [0] * (max(alist)+1)  #O(n)
