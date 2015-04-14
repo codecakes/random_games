@@ -39,8 +39,9 @@ class Pillar(deque):
     
     def pop(self):
         """Pops the extreme end from stack"""
-        self.pop()
+        x = super(type(self), self).pop()
         self.update()
+        return x
     
     def push(self, i):
         """Appends to the extreme end of stack the number i"""
@@ -52,6 +53,12 @@ class Pillar(deque):
     def populate(self, num):
         if num <= self.maxlen: self.extend(range(1, num+1)[::-1])
         else: raise Exception("Pillar StackOverflow! Choose a lower number")
+    
+    def __str__(self):
+        return "Pillar %s : %s" %(self.name, super(type(self), self).__str__())
+    
+    def __repr_(self):
+        return self.__str__()
             
         
 
@@ -59,15 +66,20 @@ class Pillar(deque):
 def move(source, target):
     s_top = source.top()
     t_top = target.top()
-    if s_top > t_top:
+    if t_top == 0 and s_top > 0:
+        target.push(source.pop())
+    elif s_top == 0 and t_top > 0:
+        source.push(target.pop())
+    elif s_top > t_top:
         source.push(target.pop())
     else:
         target.push(source.pop())
 
 
 def move_discs(n):
+    if n < 1: return
+    
     s,a,d = Pillar('s', n), Pillar('a', n), Pillar('d', n)
-    #pillars = [s, a, d]
     
     if n%2 == 0:
         target = a
@@ -77,16 +89,28 @@ def move_discs(n):
         other = a
     
     s.populate(n)
-        
+    
+    print s, a, d
+    #print "target {}".format(target)
+    #print "other {}".format(other)
+    
     while len(d) != n:
         #move is between Source and Target
         move(s, target)
+        if len(d) == n: break
+        #print s.top(), other.top()
         #move is between Source and Other
         move(s, other)
+        if len(d) == n: break
         #move is between Target and Other
         move(target, other)
+        #print s, a, d
+    print s, a, d
     return (s,a,d)
+    
 
 #just for tests
 if __name__ == "__main__":
-    print move_discs(3)
+    for i in xrange(21):
+        print move_discs(i)
+        print "-"*10
