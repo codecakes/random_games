@@ -281,3 +281,23 @@ if __name__ == "__main__":
     print node.val 
     print node.headptr.val
     print node.len
+    
+    f,g,h = [LinkedNode() for _ in xrange(3)]
+    map(lambda x: x[0].setVal(x[1]), ((f,300), (g,45), (h, 56)))
+    
+    f.setNxt(g)
+    g.setNxt(h)
+    R = SingleLinkedList(f)
+    L.updateList(R)
+    print "="*10
+    node = L.head_node
+    while node.hasNxt():
+        print node.val 
+        print node.headptr.val
+        print node.len
+        print
+        node = node.getNxt()
+    print node.val 
+    print node.headptr.val
+    print node.len
+    
