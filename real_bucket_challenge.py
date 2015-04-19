@@ -11,7 +11,7 @@
 """Inspiration:
 MIT 6.042j: Explores the basics of number theory
 and algorithms for computation with integers.
-Motivation to: GCD ;-)
+Motivation to GCD: MODULO ARITHMETIC! ;-)
 """
 
 from collections import deque
@@ -54,6 +54,7 @@ def run_bucks(small_max, large_max, target_val):
     fill_buck(small, large, target_val)
 
 if __name__ == "__main__":
+    #Remainder
     run_bucks(3, 5, 4)
     run_bucks(4, 6, 2)
     run_bucks(44, 55, 11)
