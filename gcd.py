@@ -1,7 +1,8 @@
 from numpy import matrix, linalg
 
 def gcd(a,b):
-    rem = a%b if a>b else b%a
+    a,b = (a,b) if a>b else (b,a)
+    rem = a%b
     return gcd(b, rem) if rem != 0 else b
 
 def pulverizer(a,b):
@@ -13,6 +14,7 @@ def pulverizer(a,b):
 
 def bezout(a,b):
     """Finding Bezout's Identity by Extended Euclid's method"""
+    px,py = (a,b)
     a,b = (a,b) if a>b else (b,a)
     x,y = a,b
     q = a//b
@@ -31,7 +33,27 @@ def bezout(a,b):
         t_2, t_1 = t_1, t
     assert abs(a*s) == abs(y)
     assert abs(a*t) == abs(x)
+    s_2, t_2 = (s_2, t_2) if px>py else (t_2, s_2)
+    assert (s_2*px + t_2*py) == a
+    #print a, b
+    #print s, t
+    #print (a*s), (a*t)
+    #print x,y
+    #print px,py
     return a, s_2, t_2
+
+def multiplicative_inverse(a,n):
+    t = 0
+    newt = 1
+    r = n
+    newr = a    
+    while newr != 0:
+        quotient = r // newr
+        (t, newt) = (newt, t - quotient * newt) 
+        (r, newr) = (newr, r - quotient * newr)
+    if r > 1: return "a is not invertible"
+    if t < 0: t = t + n
+    return t
 
 
 #REWORK - FIX CONCEPT!
@@ -64,4 +86,7 @@ def pulverizer_bezout_matrix(a,b):
     #print mInv[0,0], mInv[0,1]
     assert long(mInv[0,0]*x + mInv[0,1]*y) == b
     return (mInv[0,0], mInv[0,1], mInv[0,0]*x + mInv[0,1]*y, b)
-    
+
+def euler_tot(n):
+    """Euler's Totient Function"""
+    return len([i for i in range(1, n) if gcd(n, i)==1])
