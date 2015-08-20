@@ -28,7 +28,7 @@ def daysBetweenDates(year1, month1, day1, year2, month2, day2):
     total_days += month_days[month] - day
     month = month+1 if month <= end_month else 13
     
-    #O(n+k)     | k <= 24 ~ O(n)
+    #O(n/~365 + k)     | k <= 24 ~ O(n)
     for yy in xrange(year1, year2 + 1):
         #toprint("Year %s",0, yy)
         if year1 < yy < year2:
