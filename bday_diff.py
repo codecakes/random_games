@@ -1,9 +1,15 @@
 #This is what I call a close to good enough program design. satisfied.
 #author: @codecakes; maintainer: @codecakes
 
-month_days = dict(zip(range(1,13), [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]))
+month_day = dict(zip(range(1,13), [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]))
 leap = lambda yy: (yy%4 == 0 and not (yy%100 == 0)) \
                     or (yy%4 == 0 and yy%100 == 0 and yy%400==0)
+
+def month_days(month, leap=False):
+    '''Returns the number of days in the month'''
+    assert 1 <= month <=12
+    return month_day[month] if month != 2 \
+                            else month_day[month] + (1 if leap else 0)
 
 def nextDay(year, month, day):
     """
@@ -22,11 +28,13 @@ def nextDay(year, month, day):
     next_year = year
     next_month = month
     next_day = day
+    is_leap = False
     #consider the leap year and month case
     if month == 2 and leap(year):
-        month_days[2] = 29
+        is_leap = True
+        #month_days[2] = 29
     #get total days in current month
-    cur_month_days = month_days[month]
+    cur_month_days = month_days(month, is_leap)
     #print "cuurent month days {}".format(cur_month_days)
     #if the next day exceeds total days in the month
     #rollover next date
@@ -46,7 +54,7 @@ def nextDay(year, month, day):
         #else increment to next day
         next_day += 1
     #set the default non leap year configuration back
-    month_days[2] = 28
+    #month_days[2] = 28
     return(next_year, next_month, next_day)
 
 assert nextDay(1999, 12, 30) == (1999, 12, 31)
@@ -66,14 +74,16 @@ def dataIsBefore(year1, month1, day1, year2, month2, day2):
 
 def calcYr1(year1, month1, day1):
     total_days = 0
+    is_leap = False
     if leap(year1):
-        month_days[2] = 29
+        #month_days[2] = 29
+        is_leap = True
     #rest days of that month
-    total_days += month_days[month1] - day1
+    total_days += month_days(month1, is_leap) - day1
     #total days from rest of the months in first year
     for month in xrange(month1+1, 13):
-        total_days += month_days[month]
-    month_days[2] = 28
+        total_days += month_days(month, is_leap) #month_days[month]
+    #month_days[2] = 28
     return total_days
 
 assert calcYr1(2013,1,1) == 364
@@ -81,14 +91,16 @@ assert calcYr1(2013,1,2) == 363
 
 def calcYr2(year2, month2, day2):
     total_days = 0
+    is_leap = False
     if leap(year2):
-        month_days[2] = 29
+        #month_days[2] = 29
+        is_leap = True
     #total days from all months before end month of last year
     for month in xrange(1, month2):
-        total_days += month_days[month]
+        total_days += month_days(month, is_leap) #month_days[month]
     #all days till day2 of end month
     total_days += day2
-    month_days[2] = 28
+    #month_days[2] = 28
     return total_days
 
 assert calcYr2(2013,1,1) == 1
