@@ -81,7 +81,7 @@ class hashmap(object):
     def _expandTable(self):
         self.bsize *= 2
         newtable = create_table(self.bsize)
-        print "new table %s" %newtable
+        #print "new table %s" %newtable
         q = deque(maxlen=self.bsize)
         q.appendleft(self.table)
         #O(nlogn)
@@ -92,12 +92,12 @@ class hashmap(object):
                 q.appendleft(tbl[:ln//2])
                 q.appendleft(tbl[ln//2:])
             else:
-                print "_expandTable else tbl is {}".format(tbl)
+                #print "_expandTable else tbl is {}".format(tbl)
                 for each_buck in tbl:
                     for each_key_list in each_buck:
                         if each_key_list:
-                            print "each key list is {}".format(each_key_list)
-                            print "_expandTable adding key {} val {}".format(each_key_list[0], each_key_list[1])
+                            #print "each key list is {}".format(each_key_list)
+                            #print "_expandTable adding key {} val {}".format(each_key_list[0], each_key_list[1])
                             hashtable_add(newtable, each_key_list[0], each_key_list[1])
         assert len(self.table) < len(newtable)
         del self.table
