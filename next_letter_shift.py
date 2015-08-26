@@ -32,3 +32,12 @@ assert shift_n_letters('s', 2) == 'u'
 assert shift_n_letters('s', 10) == 'c'
 
 assert shift_n_letters('s', -10) == 'i'
+
+def rotate(line, n):
+    # Your code here
+    split_list = line.split()
+    return ' '.join(map(lambda each_str: ''.join(map(lambda lt: shift_n_letters(lt, n), \
+                                    each_str)), split_list))
+
+print rotate(("zw pfli tfuv nfibj tfiivtkcp pfl jyflcu "
+                "sv rscv kf ivru kyzj"),-17)
