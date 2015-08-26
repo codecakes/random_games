@@ -39,5 +39,7 @@ def rotate(line, n):
     return ' '.join(map(lambda each_str: ''.join(map(lambda lt: shift_n_letters(lt, n), \
                                     each_str)), split_list))
 
-print rotate(("zw pfli tfuv nfibj tfiivtkcp pfl jyflcu "
-                "sv rscv kf ivru kyzj"),-17)
+assert rotate(("zw pfli tfuv nfibj tfiivtkcp pfl jyflcu "
+                "sv rscv kf ivru kyzj"),-17) == \
+                "if your code works correctly you should be able to "\
+                "read this"
