@@ -63,12 +63,12 @@ def hashtable_update(htable,key,value):
 class hashmap(object):
     
     def __init__(self, bsize=0):
-        self.bsize = bsize or 20
+        self.bsize = bsize or 3
         self.table = create_table(self.bsize)
         self.keyCount = 0
     
     def __str__(self):
-        return self.table
+        return "%s" %self.table
     
     def __repr__(self):
         return "{}".format(self.__str__())
@@ -173,5 +173,5 @@ if __name__ == "__main__":
     d['ffsd'] = 32423324
     d.remove('ffsd')
     
-    assert d == [[], [], [], [['fdfsfdsdssdfsd', 32423324]], [], \
-    [['fdffsd', 32423324]], [], [['fdfds', 32423324], ['fdfsfdsds', 32423324]]]
+    t = [[], [], [], [['fdfsfdsdssdfsd', 32423324]], [], [['fdffsd', 32423324]], [], [['fdfds', 32423324], ['fdfsfdsds', 32423324]]]
+    assert repr(d) == repr(t)
