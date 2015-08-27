@@ -2,10 +2,13 @@
 def fibonacci(n):
     prev = 0
     now = 1
+    #for loop fails when X in range(X) is quite large HA HA HA.
     while n:
         prev, now = now, now + prev
         n -= 1
     return prev
+
+
 
 assert fibonacci(0)==0
 assert fibonacci(1)==1
