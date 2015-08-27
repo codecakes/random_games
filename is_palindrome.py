@@ -16,11 +16,8 @@ assert is_palindrome('') == True
 #non recursive loop method
 def is_palindrome_loop(s):
     ln = len(s)
-    stat = True
     for i in xrange(ln/2):
-        stat = stat and (s[i] == s[ln-i-1])
-        if not stat:
-            return False
+        if not (s[i] == s[ln-i-1]): return False
     return True
 
 assert is_palindrome_loop('abab') == False
