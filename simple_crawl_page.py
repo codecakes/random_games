@@ -3,6 +3,7 @@
 import re
 from string import punctuation
 import requests
+  
 
 def get_page(url):
     try:
@@ -176,7 +177,9 @@ def crawl_web(seed,max_depth):
         if not tocrawl:
             tocrawl, next_depth = next_depth, []
             depth = depth + 1
+    #print graph
     return crawled
+
 
 assert sorted(crawl_web("http://www.udacity.com/cs101x/index.html",0)) == \
 sorted(['http://www.udacity.com/cs101x/index.html'])
@@ -209,8 +212,12 @@ sorted(['A1', 'C1', 'B1', 'E1', 'D1', 'F1'])
 assert sorted(crawl_web("A1",2)) == \
 sorted(['A1', 'B1', 'C1', 'D1', 'E1'])
 
+
+
 def dance(seed,max_depth):
-    '''A more elegant design'''
+    '''A more elegant design
+    index: {keyword: [list of urls]}
+    '''
     tocrawl = [seed]
     crawled = []
     next_depth = []
@@ -218,7 +225,8 @@ def dance(seed,max_depth):
     graph = {}
     depth = 0
     #if you want depth specify
-    while tocrawl and depth <= max_depth:
+    while tocrawl:
+        if not depth <= max_depth and max_depth != -1: break
         page_url = tocrawl.pop()
         if page_url not in crawled:
             #get the html content from page url
@@ -238,7 +246,6 @@ def dance(seed,max_depth):
             tocrawl, next_depth = next_depth, []
             depth = depth + 1
     return index, graph
-
 
 
 #Finishing the page ranking algorithm.
@@ -269,3 +276,156 @@ def compute_ranks(graph):
             newranks[page] = newrank
         ranks = newranks
     return ranks
+
+#I'm feeling lucky
+def lucky_search(index, ranks, keyword):
+    if keyword not in index: return None
+    return max([(url, ranks[url]) for url in index[keyword]], \
+                key = lambda x: x[1])[0]
+
+if __name__ == "__main__":
+        
+    ##Tests
+    
+    #setup
+    cache = {
+    'http://udacity.com/cs101x/urank/index.html': """<html>
+    <body>
+    <h1>Dave's Cooking Algorithms</h1>
+    <p>
+    Here are my favorite recipies:
+    <ul>
+    <li> <a href="http://udacity.com/cs101x/urank/hummus.html">Hummus Recipe</a>
+    <li> <a href="http://udacity.com/cs101x/urank/arsenic.html">World's Best Hummus</a>
+    <li> <a href="http://udacity.com/cs101x/urank/kathleen.html">Kathleen's Hummus Recipe</a>
+    </ul>
+    
+    For more expert opinions, check out the 
+    <a href="http://udacity.com/cs101x/urank/nickel.html">Nickel Chef</a> 
+    and <a href="http://udacity.com/cs101x/urank/zinc.html">Zinc Chef</a>.
+    </body>
+    </html>
+    
+    
+    
+    
+    
+    
+    """,
+    'http://udacity.com/cs101x/urank/zinc.html': """<html>
+    <body>
+    <h1>The Zinc Chef</h1>
+    <p>
+    I learned everything I know from 
+    <a href="http://udacity.com/cs101x/urank/nickel.html">the Nickel Chef</a>.
+    </p>
+    <p>
+    For great hummus, try 
+    <a href="http://udacity.com/cs101x/urank/arsenic.html">this recipe</a>.
+    
+    </body>
+    </html>
+    
+    
+    
+    
+    
+    
+    """,
+    'http://udacity.com/cs101x/urank/nickel.html': """<html>
+    <body>
+    <h1>The Nickel Chef</h1>
+    <p>
+    This is the
+    <a href="http://udacity.com/cs101x/urank/kathleen.html">
+    best Hummus recipe!
+    </a>
+    
+    </body>
+    </html>
+    
+    
+    
+    
+    
+    
+    """,
+    'http://udacity.com/cs101x/urank/kathleen.html': """<html>
+    <body>
+    <h1>
+    Kathleen's Hummus Recipe
+    </h1>
+    <p>
+    
+    <ol>
+    <li> Open a can of garbonzo beans.
+    <li> Crush them in a blender.
+    <li> Add 3 tablesppons of tahini sauce.
+    <li> Squeeze in one lemon.
+    <li> Add salt, pepper, and buttercream frosting to taste.
+    </ol>
+    
+    </body>
+    </html>
+    
+    """,
+    'http://udacity.com/cs101x/urank/arsenic.html': """<html>
+    <body>
+    <h1>
+    The Arsenic Chef's World Famous Hummus Recipe
+    </h1>
+    <p>
+    
+    <ol>
+    <li> Kidnap the <a href="http://udacity.com/cs101x/urank/nickel.html">Nickel Chef</a>.
+    <li> Force her to make hummus for you.
+    </ol>
+    
+    </body>
+    </html>
+    
+    """,
+    'http://udacity.com/cs101x/urank/hummus.html': """<html>
+    <body>
+    <h1>
+    Hummus Recipe
+    </h1>
+    <p>
+    
+    <ol>
+    <li> Go to the store and buy a container of hummus.
+    <li> Open it.
+    </ol>
+    
+    </body>
+    </html>
+    
+    
+    
+    
+    """,
+    }
+    
+    def get_page(url):
+        try:
+            if url in cache:
+                return cache[url]
+            else:
+                return requests.get(url).content
+        except Exception as e:
+            print e
+            return "" 
+    
+    
+    index, graph = dance('http://udacity.com/cs101x/urank/index.html', -1)
+    #print graph
+    ranks = compute_ranks(graph)
+    
+    assert lucky_search(index, ranks, 'Hummus')== \
+    "http://udacity.com/cs101x/urank/kathleen.html"
+    
+    assert lucky_search(index, ranks, 'the') == \
+    "http://udacity.com/cs101x/urank/nickel.html"
+    
+    assert lucky_search(index, ranks, 'babaganoush') == \
+    None
