@@ -47,14 +47,13 @@ def fact(n):
     return res
 
 def combination(n,k):
+    #~O(N-k) --> O(1)
     return fact(n)/(fact(k) *(fact(n-k))) if n >= k else 0
 
 def triangle(n):
+    #Omega(N^2)
     return [[combination(each_row, k) for k in xrange(each_row+1)] for each_row in xrange(n)]
         
-
-
-
 #Tests
 
 assert triangle(0) == []
@@ -66,3 +65,16 @@ assert triangle(2) == [[1], [1, 1]]
 assert triangle(3) == [[1], [1, 1], [1, 2, 1]]
 
 assert triangle(6) == [[1], [1, 1], [1, 2, 1], [1, 3, 3, 1], [1, 4, 6, 4, 1], [1, 5, 10, 10, 5, 1]]
+
+def print_pascal(n):
+    tri = triangle(n)
+    hlf = 2*n
+    s = ''
+    for i in xrange(1,n+1):
+        res = list(map(str,tri[i-1]))
+        s += ' '.join(res[:len(res)/2]).zfill((hlf)-i).replace('0', '-') + '|' + ' '.join(res[len(res)/2:]) + " "*(hlf-i) + "\n"
+    return s
+             
+
+print print_pascal(10)
+

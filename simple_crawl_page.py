@@ -119,18 +119,12 @@ def lookup(index, keyword):
     return index.get(keyword, None)
 
 def add_keyword_to_index(index, keyword, url):
-    index.setdefault(keyword, []).append(url)
-    #if keyword in index:
-    #    index[keyword].append(url)
-    #for each in index:
-    #    if each[0] == keyword:
-    #        if url not in each[1]:
-    #            each[1].append(url)
-    #            return
-    #else:
-    #    #index.append([keyword, [url]])
-    #    index[keyword] = [url]
-
+    exists = index.get(keyword, None)
+    if exists:
+        if url not in exists:
+            index.setdefault(keyword, []).append(url)
+    else:
+        index.setdefault(keyword, []).append(url)
 
 def split_string(source,splitlist):
     pat = '|'.join(["[\{}]+".format(e) for e in list(splitlist)]) \
@@ -144,8 +138,7 @@ def add_urls_to_index(index, page_url, content):
     #content = [w.strip() for w in content.split()]
     content = split_string(content, punctuation) if content else ''
     [add_keyword_to_index(index, each_wrd, page_url) \
-    for each_wrd in content if each_wrd]
-        
+    for each_wrd in content if each_wrd]        
     return
 
 def crawl_web(seed,max_depth):
@@ -247,6 +240,36 @@ def dance(seed,max_depth):
             depth = depth + 1
     return index, graph
 
+def crawl_web2(seed):
+    '''A more elegant design'''
+    tocrawl = [seed]
+    crawled = []
+    next_depth = []
+    #index = []
+    index = {}
+    graph = {}
+    depth = 0
+    #if you want depth specify
+    while tocrawl:
+        page_url = tocrawl.pop()
+        if page_url not in crawled:
+            #get the html content from page url
+            content = get_page(page_url)
+            #get all parsable links from the html content
+            all_links = get_all_links(content)
+            #this is what adds urls to a keyword in index
+            add_urls_to_index(index, page_url, content)
+            #map the current page url to all links it outlinks to
+            graph.setdefault(page_url, []).extend(all_links)
+            #append all new links to parse
+            union(next_depth, all_links)
+            crawled.append(page_url)
+        #once tocrawl is empty=the breadth of that level is empty
+        #move to crawling next level of links
+        if not tocrawl:
+            tocrawl, next_depth = next_depth, []
+    #print graph
+    return index, graph
 
 #Finishing the page ranking algorithm.
 def compute_ranks(graph):
@@ -282,6 +305,15 @@ def lucky_search(index, ranks, keyword):
     if keyword not in index: return None
     return max([(url, ranks[url]) for url in index[keyword]], \
                 key = lambda x: x[1])[0]
+
+#ordered result form high to low rank
+def ordered_search(index, ranks, keyword):
+    #print index.get(keyword, None)
+    return [url[0] for url in \
+        sorted([(each_url, ranks[each_url]) \
+                for each_url in index[keyword]], \
+                key=lambda r: r[1], reverse=True)] if keyword in index \
+                                                    else None
 
 if __name__ == "__main__":
         
@@ -429,3 +461,137 @@ if __name__ == "__main__":
     
     assert lucky_search(index, ranks, 'babaganoush') == \
     None
+    
+
+    cache = {
+    'http://udacity.com/cs101x/urank/index.html': """<html>
+    <body>
+    <h1>Dave's Cooking Algorithms</h1>
+    <p>
+    Here are my favorite recipies:
+    <ul>
+    <li> <a href="http://udacity.com/cs101x/urank/hummus.html">Hummus Recipe</a>
+    <li> <a href="http://udacity.com/cs101x/urank/arsenic.html">World's Best Hummus</a>
+    <li> <a href="http://udacity.com/cs101x/urank/kathleen.html">Kathleen's Hummus Recipe</a>
+    </ul>
+    
+    For more expert opinions, check out the
+    <a href="http://udacity.com/cs101x/urank/nickel.html">Nickel Chef</a>
+    and <a href="http://udacity.com/cs101x/urank/zinc.html">Zinc Chef</a>.
+    </body>
+    </html>
+    
+    
+    
+    
+    
+    
+    """,
+    'http://udacity.com/cs101x/urank/zinc.html': """<html>
+    <body>
+    <h1>The Zinc Chef</h1>
+    <p>
+    I learned everything I know from
+    <a href="http://udacity.com/cs101x/urank/nickel.html">the Nickel Chef</a>.
+    </p>
+    <p>
+    For great hummus, try
+    <a href="http://udacity.com/cs101x/urank/arsenic.html">this recipe</a>.
+    
+    </body>
+    </html>
+    
+    
+    
+    
+    
+    
+    """,
+    'http://udacity.com/cs101x/urank/nickel.html': """<html>
+    <body>
+    <h1>The Nickel Chef</h1>
+    <p>
+    This is the
+    <a href="http://udacity.com/cs101x/urank/kathleen.html">
+    best Hummus recipe!
+    </a>
+    
+    </body>
+    </html>
+    
+    
+    
+    
+    
+    
+    """,
+    'http://udacity.com/cs101x/urank/kathleen.html': """<html>
+    <body>
+    <h1>
+    Kathleen's Hummus Recipe
+    </h1>
+    <p>
+    
+    <ol>
+    <li> Open a can of garbonzo beans.
+    <li> Crush them in a blender.
+    <li> Add 3 tablesppons of tahini sauce.
+    <li> Squeeze in one lemon.
+    <li> Add salt, pepper, and buttercream frosting to taste.
+    </ol>
+    
+    </body>
+    </html>
+    
+    """,
+    'http://udacity.com/cs101x/urank/arsenic.html': """<html>
+    <body>
+    <h1>
+    The Arsenic Chef's World Famous Hummus Recipe
+    </h1>
+    <p>
+    
+    <ol>
+    <li> Kidnap the <a href="http://udacity.com/cs101x/urank/nickel.html">Nickel Chef</a>.
+    <li> Force her to make hummus for you.
+    </ol>
+    
+    </body>
+    </html>
+    
+    """,
+    'http://udacity.com/cs101x/urank/hummus.html': """<html>
+    <body>
+    <h1>
+    Hummus Recipe
+    </h1>
+    <p>
+    
+    <ol>
+    <li> Go to the store and buy a container of hummus.
+    <li> Open it.
+    </ol>
+    
+    </body>
+    </html>
+    
+    
+    
+    
+    """,
+    }
+    
+    index, graph = dance('http://udacity.com/cs101x/urank/index.html', -1)
+    ranks = compute_ranks(graph)
+    
+    assert ordered_search(index, ranks, 'Hummus') == \
+    ['http://udacity.com/cs101x/urank/kathleen.html',
+        'http://udacity.com/cs101x/urank/nickel.html',
+        'http://udacity.com/cs101x/urank/arsenic.html',
+        'http://udacity.com/cs101x/urank/hummus.html',
+        'http://udacity.com/cs101x/urank/index.html']
+    
+    assert ordered_search(index, ranks, 'babaganoush') == None
+    
+    
+    
