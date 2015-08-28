@@ -254,6 +254,8 @@ def compute_ranks(graph):
     for page in graph:
         ranks[page] = npages_r
     
+    #TODO: Transform inner loop into NP Matrix
+    #TODO: Transform outer loop markov Chained matrices
     for i in range(0, numloops):
         newranks = {}
         for page in graph:
